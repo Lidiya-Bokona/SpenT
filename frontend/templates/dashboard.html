@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – SpenT</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script src="/static/js/scripts.js" defer></script>
+</head>
+<body class="dark">
+  <aside class="sidebar">
+    <h2>SpenT</h2>
+    <p class="tagline">TIME IS CURRENCY</p>
+    <nav>
+      <a href="/dashboard" class="active">Dashboard</a>
+      <a href="/tasks">Tasks</a>
+      <a href="/calendar">Calendar</a>
+      <a href="/analytics">Analytics</a>
+      <a href="/logout">Log Out</a>
+    </nav>
+  </aside>
+
+  <main class="dashboard">
+    <h1>Financial Overview</h1>
+    <p>Your daily time expenditure report.</p>
+    <div class="capital">
+      <h2 id="remaining">$8,097</h2>
+      <p>Seconds remaining to invest today</p>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <h3>Invested Capital</h3>
+        <p>$0</p>
+        <span>0h 0m duration</span>
+      </div>
+      <div class="metric">
+        <h3>Operating Expenses</h3>
+        <p>$0</p>
+        <span>0h 0m duration</span>
+      </div>
+      <div class="metric">
+        <h3>Losses / Wasted</h3>
+        <p>$0</p>
+        <span>0h 0m duration</span>
+      </div>
+    </div>
+
+    <section class="transactions">
+      <h3>Recent Transactions</h3>
+      <p>No activity recorded today. Start investing your time.</p>
+    </section>
+  </main>
+</body>
+</html>
