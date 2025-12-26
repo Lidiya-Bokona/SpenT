@@ -1,0 +1,7 @@
+flask
+flask-sqlalchemy
+flask-login
+mysql-connector-python
+chart.js
+fullcalendar
+weasyprint
