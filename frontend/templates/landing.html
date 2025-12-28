@@ -1,24 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SpenT – Time is Currency</title>
-  <link rel="stylesheet" href="/static/css/style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpenT - Spend Your Time Like Money</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Landing Specific Overrides if needed, though style.css should handle most */
+        .landing-hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 3rem;
+        }
+
+        .hero-logo .analog-clock {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            border: 3px solid var(--accent-gold, #D4AF37);
+        }
+
+        .hero-logo .dollar-sign {
+            font-size: 40px;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            color: var(--accent-gold, #D4AF37);
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: var(--text-secondary, #aaa);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        .btn-gold {
+            background: var(--accent-gold, #D4AF37);
+            color: #000;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-dark {
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-dark:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #fff;
+        }
+    </style>
 </head>
-<body class="dark">
-  <div class="centered">
-    <div class="logo-tagline">
-      <div class="logo-circle">⏰</div>
-      <h1>SpenT</h1>
-      <p class="tagline">Time is Currency. Spend it wisely.</p>
+
+<body>
+    <div class="landing-hero">
+        <div class="hero-content fade-in">
+            <div class="hero-logo-animated large">
+                <div class="analog-clock">
+                    <div class="dollar-sign">$</div>
+                    <div class="hand hour-hand"></div>
+                    <div class="hand minute-hand"></div>
+                </div>
+            </div>
+
+            <h1 class="hero-title">SpenT</h1>
+            <p class="tagline">Spend your time like money.</p>
+
+            <p class="description">
+                Every day, you’re given <strong>$86,400</strong> in seconds. No matter what, it runs out by midnight.
+                <br><br>
+                What matters is where you spend it. The more you invest in meaningful tasks, the greater your return on
+                investment.
+            </p>
+
+            <div class="cta-buttons">
+                <a href="{{ url_for('auth.signup') }}" class="btn btn-primary glowing-border"
+                    style="font-size: 1.1rem; padding: 1rem 2.5rem; border-radius: 50px;">Start Investing</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary"
+                    style="font-size: 1.1rem; padding: 1rem 2.5rem; border-radius: 50px;">Log In</a>
+            </div>
+        </div>
     </div>
-    <h2 class="headline">Stop Spending.<br>Start Investing.</h2>
-    <p class="subtext">Every day you are given $86,400 in seconds.<br>SpenT helps you track every second like a dollar.</p>
-    <div class="cta-buttons">
-      <a href="/signup" class="btn gold">Open Account</a>
-      <a href="/philosophy" class="btn outline">Learn the Philosophy</a>
-    </div>
-  </div>
 </body>
+
 </html>

@@ -1,55 +1,179 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard – SpenT</title>
-  <link rel="stylesheet" href="/static/css/style.css" />
-  <script src="/static/js/scripts.js" defer></script>
-</head>
-<body class="dark">
-  <aside class="sidebar">
-    <h2>SpenT</h2>
-    <p class="tagline">TIME IS CURRENCY</p>
-    <nav>
-      <a href="/dashboard" class="active">Dashboard</a>
-      <a href="/tasks">Tasks</a>
-      <a href="/calendar">Calendar</a>
-      <a href="/analytics">Analytics</a>
-      <a href="/logout">Log Out</a>
-    </nav>
-  </aside>
+{% extends "base.html" %}
 
-  <main class="dashboard">
-    <h1>Financial Overview</h1>
-    <p>Your daily time expenditure report.</p>
-    <div class="capital">
-      <h2 id="remaining">$8,097</h2>
-      <p>Seconds remaining to invest today</p>
+{% block content %}
+<div class="dashboard-header">
+  <div class="user-greeting">
+    <h2 style="margin:0;">Welcome back, <span style="color: var(--accent-gold);">{{ current_user.username }}</span>.
+    </h2>
+    <div id="current-datetime" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">Loading...
+    </div>
+  </div>
+</div>
+
+<div class="balance-card glass-card" style="margin-bottom: 2rem;">
+  <div class="balance-label">Remaining Balance</div>
+  <div class="countdown" id="countdown" data-remaining="{{ remaining }}">
+    $<span id="money-counter">{{ remaining }}</span>
+  </div>
+  <p class="subtext">Time is your most valuable asset.</p>
+</div>
+
+<div class="metrics-row">
+  <div class="metric-card glass-card">
+    <div class="metric-info">
+      <h4>Invested Today</h4>
+      <div class="metric-value currency-gold">$<span id="invested-today">{{ invested }}</span></div>
+      <div id="invested-duration" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">0h 0m</div>
+    </div>
+    <div class="trend-icon trend-up">📈</div>
+  </div>
+  <div class="metric-card glass-card">
+    <div class="metric-info">
+      <h4>Wasted Today</h4>
+      <div class="metric-value currency-red">$<span id="wasted-today">{{ wasted }}</span></div>
+      <div id="wasted-duration" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">0h 0m</div>
+    </div>
+    <div class="trend-icon trend-down">📉</div>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <div class="tasks-section" style="width: 100%;">
+    <div class="section-header"
+      style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--glass-border); padding-bottom:1rem;">
+      <h3>Today's Ledger</h3>
+      <button class="btn btn-primary" onclick="openByModal()">+ Add Task</button>
     </div>
 
-    <div class="metrics">
-      <div class="metric">
-        <h3>Invested Capital</h3>
-        <p>$0</p>
-        <span>0h 0m duration</span>
-      </div>
-      <div class="metric">
-        <h3>Operating Expenses</h3>
-        <p>$0</p>
-        <span>0h 0m duration</span>
-      </div>
-      <div class="metric">
-        <h3>Losses / Wasted</h3>
-        <p>$0</p>
-        <span>0h 0m duration</span>
-      </div>
+    <div class="task-list" id="task-list">
+      <!-- Tasks will be loaded here via JS (main.js) calling /api/dashboard -->
+      <!-- Initial render from server can be avoided or kept as fallback, but main.js clears it. -->
+      <p style="text-align:center; color:var(--text-secondary);">Loading transactions...</p>
     </div>
+  </div>
+</div>
 
-    <section class="transactions">
-      <h3>Recent Transactions</h3>
-      <p>No activity recorded today. Start investing your time.</p>
-    </section>
-  </main>
-</body>
-</html>
+<!-- Task Modal -->
+<div class="modal-overlay" id="task-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modal-title" style="margin:0; font-size:1.5rem; color: var(--accent-gold);">New Transaction</h3>
+      <button class="close-modal-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="modal-task-form" class="modern-form">
+      <input type="hidden" id="task-id">
+
+      <div class="form-group">
+        <label>Task Name</label>
+        <input type="text" id="m-task-name" placeholder="E.g. Deep Work" required>
+      </div>
+
+      <div class="form-group" style="display: flex; gap: 1rem;">
+        <div style="flex: 1;">
+          <label>Start Time</label>
+          <input type="time" id="m-task-start" required>
+        </div>
+        <div style="flex: 1;">
+          <label>End Time</label>
+          <input type="time" id="m-task-end" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Task Type (Category)</label>
+        <div class="category-selector">
+          <input type="radio" name="category" id="cat-good" value="Good" checked>
+          <label for="cat-good" class="cat-option option-good">
+            <i class="fas fa-arrow-trend-up"></i>
+            <span>Investment</span>
+          </label>
+
+          <input type="radio" name="category" id="cat-neutral" value="Neutral">
+          <label for="cat-neutral" class="cat-option option-neutral">
+            <i class="fas fa-minus"></i>
+            <span>Neutral</span>
+          </label>
+
+          <input type="radio" name="category" id="cat-bad" value="Bad">
+          <label for="cat-bad" class="cat-option option-bad">
+            <i class="fas fa-arrow-trend-down"></i>
+            <span>Expense</span>
+          </label>
+        </div>
+        <!-- Hidden select to maintain compatibility with existing JS if needed, or update JS to read radios -->
+        <select id="m-task-label" style="display:none;">
+          <option value="Good">Investment</option>
+          <option value="Neutral">Neutral</option>
+          <option value="Bad">Expense</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="m-task-desc" rows="2" placeholder="Add details (optional)..."></textarea>
+      </div>
+
+      <div class="form-section-divider"></div>
+
+      <div class="form-group">
+        <div class="routine-toggle-wrapper">
+          <label class="switch-label">
+            <span style="font-weight:600; font-size:0.95rem;">Routine Task</span>
+            <span style="font-size:0.8rem; color:var(--text-secondary); display:block;">Repeat this transaction
+              automatically</span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="m-is-routine">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group hidden fade-in" id="routine-options">
+        <label style="margin-bottom:0.5rem; display:block;">Frequency</label>
+        <div class="recurrence-options">
+          <select id="m-recurrence-type" class="modern-select">
+            <option value="Daily">Daily (Every Day)</option>
+            <option value="Weekdays">Weekdays (Mon-Fri)</option>
+            <option value="Weekends">Weekends (Sat-Sun)</option>
+            <option value="Custom">Custom Days</option>
+          </select>
+        </div>
+
+        <div class="custom-days-selector hidden" id="custom-days-container" style="margin-top:1rem;">
+          <label><input type="checkbox" class="day-checkbox" value="Mon"><span class="day-label">M</span></label>
+          <label><input type="checkbox" class="day-checkbox" value="Tue"><span class="day-label">T</span></label>
+          <label><input type="checkbox" class="day-checkbox" value="Wed"><span class="day-label">W</span></label>
+          <label><input type="checkbox" class="day-checkbox" value="Thu"><span class="day-label">T</span></label>
+          <label><input type="checkbox" class="day-checkbox" value="Fri"><span class="day-label">F</span></label>
+          <label><input type="checkbox" class="day-checkbox" value="Sat"><span class="day-label">S</span></label>
+          <label><input type="checkbox" class="day-checkbox" value="Sun"><span class="day-label">S</span></label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary full-width" style="width: 100%; margin-top: 1rem;">Save
+        Transaction</button>
+    </form>
+  </div>
+</div>
+
+
+<script>
+  // Helper to sync visual category selection with hidden select
+  document.addEventListener('DOMContentLoaded', function () {
+    const radioButtons = document.querySelectorAll('input[name="category"]');
+    const hiddenSelect = document.getElementById('m-task-label');
+
+    radioButtons.forEach(radio => {
+      radio.addEventListener('change', function () {
+        if (this.checked) {
+          hiddenSelect.value = this.value;
+        }
+      });
+    });
+
+    // Reverse sync (if editing and setting select value)
+    // You might need to add this logic in your main.js where you populate the modal for editing
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SpenT Report</title>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">
+            <div class="analog-clock" style="display: inline-block; vertical-align: middle;">
+                <div class="dollar-sign">$</div>
+                <div class="hand hour-hand"></div>
+                <div class="hand minute-hand"></div>
+            </div>
+            <h1
+                style="display:inline-block; vertical-align:middle; margin-left:15px; font-size: 2.5rem; letter-spacing: -1px;">
+                SpenT</h1>
+        </div>
+        <div class="date">Date: {{ date }}</div>
+    </div>
+
+    <div class="summary-box">
+        <h3>Daily Status (Today)</h3>
+        <table class="metrics-table">
+            <tr>
+                <th>Invested</th>
+                <th>Wasted</th>
+                <th>Remaining</th>
+            </tr>
+            <tr>
+                <td class="good">${{ invested }}</td>
+                <td class="bad">${{ wasted }}</td>
+                <td class="neutral">${{ remaining }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <h3>Transaction History</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Task</th>
+                <th>Type</th>
+                <th>Value (Duration)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr class="{{ task.label|lower }}">
+                <td>{{ task.start_time.strftime('%H:%M') }} - {{ task.end_time.strftime('%H:%M') }}</td>
+                <td>
+                    <b>{{ task.name }}</b><br>
+                    <small>{{ task.description }}</small>
+                </td>
+                <td>{{ task.label }}</td>
+                <td>${{ '%d' % ((task.end_time - task.start_time).total_seconds()) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>

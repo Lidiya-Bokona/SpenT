@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="calendar-wrapper">
+  <!-- Header -->
+  <div class="header-section"
+    style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <h2 style="margin: 0; color: var(--accent-gold);">Investment Calendar</h2>
+      <p style="color: var(--text-secondary); margin-top: 0.5rem;">Track your daily efficiency.</p>
+    </div>
+    <div class="legend" style="display: flex; gap: 1.5rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="width: 12px; height: 12px; background: var(--accent-gold); border-radius: 50%;"></span>
+        <span style="color: var(--text-secondary); font-size: 0.9rem;">Invested</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="width: 12px; height: 12px; background: var(--accent-red); border-radius: 50%;"></span>
+        <span style="color: var(--text-secondary); font-size: 0.9rem;">Wasted</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar Card -->
+  <div class="glass-card" style="padding: 1.5rem;">
+    <div id="calendar"></div>
+  </div>
+</div>
+
+<!-- Side Panel (Off-canvas) -->
+<div id="day-panel" class="side-panel">
+  <div class="panel-header">
+    <h3 id="panel-date" style="color: var(--accent-gold); margin: 0; font-size: 1.2rem;">Date</h3>
+    <button onclick="closeDayPanel()" class="close-panel-btn">&times;</button>
+  </div>
+  <div class="panel-content">
+    <!-- Stats Row -->
+    <div class="panel-stats">
+      <div class="p-stat">
+        <span class="label" style="color: var(--accent-gold);">Invested</span>
+        <span class="value currency-gold" id="p-invested">$0</span>
+      </div>
+      <div class="p-stat">
+        <span class="label" style="color: var(--accent-red);">Wasted</span>
+        <span class="value currency-red" id="p-wasted">$0</span>
+      </div>
+    </div>
+
+    <h4
+      style="margin-top: 2rem; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom:0.8rem; margin-bottom: 1rem;">
+      Transactions</h4>
+    <div id="panel-tasks" class="panel-task-list">
+      <!-- Tasks injected here -->
+    </div>
+  </div>
+</div>
+
+<div id="panel-overlay" class="panel-overlay" onclick="closeDayPanel()"></div>
+
+<!-- Styles -->
+<style>
+  /* FullCalendar Overrides */
+  .fc-theme-standard td,
+  .fc-theme-standard th {
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .fc-day-today {
+    background: rgba(212, 175, 55, 0.05) !important;
+  }
+
+  .fc-col-header-cell-cushion {
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+  }
+
+  .fc-button-primary {
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #aaa !important;
+    text-transform: uppercase;
+  }
+
+  .fc-button-active {
+    color: var(--accent-gold) !important;
+    border-color: var(--accent-gold) !important;
+    background: rgba(212, 175, 55, 0.1) !important;
+  }
+
+  /* Side Panel */
+  .side-panel {
+    position: fixed;
+    top: 0;
+    right: -450px;
+    /* Hidden */
+    width: 400px;
+    height: 100vh;
+    background: #0a0a0a;
+    /* Darker than glass */
+    border-left: 1px solid var(--accent-gold);
+    z-index: 2000;
+    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .side-panel.active {
+    right: 0;
+  }
+
+  .panel-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 215, 0, 0.05);
+  }
+
+  .close-panel-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .close-panel-btn:hover {
+    color: var(--accent-gold);
+  }
+
+  .panel-content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .panel-stats {
+    display: flex;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .p-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .p-stat .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.3rem;
+  }
+
+  .p-stat .value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+  }
+
+  .panel-task-item {
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border-left: 3px solid #555;
+    transition: transform 0.2s;
+  }
+
+  .panel-task-item:hover {
+    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .panel-task-item.Good {
+    border-left-color: var(--accent-gold);
+  }
+
+  .panel-task-item.Bad {
+    border-left-color: var(--accent-red);
+  }
+
+  .panel-task-item.Neutral {
+    border-left-color: #888;
+  }
+
+  .panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 1999;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .panel-overlay.active {
+    display: block;
+    opacity: 1;
+  }
+</style>
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+<script>
+  let calendarEvents = [];
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+
+    // Fetch events
+    fetch('/api/tasks/calendar?start=2020-01-01&end=2030-01-01')
+      .then(res => res.json())
+      .then(data => {
+        calendarEvents = data;
+        const summaries = processTasksToSummaries(data);
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
+          },
+          themeSystem: 'standard',
+          height: 'auto',
+          contentHeight: 650,
+          events: summaries,
+
+          dateClick: function (info) {
+            openDayPanel(info.dateStr);
+          },
+          eventClick: function (info) {
+            openDayPanel(info.event.startStr.split('T')[0]);
+          },
+
+          eventContent: function (arg) {
+            const props = arg.event.extendedProps;
+            const color = arg.event.textColor;
+            const isInv = arg.event.classNames.includes('summary-inv');
+            const bg = isInv ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255, 77, 77, 0.15)';
+            const type = isInv ? 'Invested' : 'Wasted';
+
+            return {
+              html: `
+              <div style="background: ${bg}; border-left: 2px solid ${color}; padding: 3px 6px; border-radius: 3px; margin-bottom: 2px; cursor: pointer;">
+                <div style="font-size: 0.8rem; font-weight: 600; color: ${color}; display: flex; justify-content: space-between; align-items: center;">
+                  <span style="opacity: 0.9;">${type}</span>
+                  <span>${arg.event.title}</span>
+                </div>
+              </div>
+            `};
+          },
+        });
+        calendar.render();
+      });
+  });
+
+  function processTasksToSummaries(tasks) {
+    const dayMap = {};
+    tasks.forEach(t => {
+      const date = t.start.split('T')[0];
+      if (!dayMap[date]) dayMap[date] = { invested: 0, wasted: 0 };
+      if (t.extendedProps.label === 'Good' || t.extendedProps.label === 'Neutral') {
+        dayMap[date].invested += t.extendedProps.cost;
+      } else {
+        dayMap[date].wasted += t.extendedProps.cost;
+      }
+    });
+
+    const events = [];
+    for (const [date, stats] of Object.entries(dayMap)) {
+      if (stats.invested > 0) {
+        events.push({
+          title: `$${stats.invested}`,
+          start: date,
+          textColor: 'var(--accent-gold)',
+          classNames: ['summary-inv'],
+          display: 'block'
+        });
+      }
+      if (stats.wasted > 0) {
+        events.push({
+          title: `$${stats.wasted}`,
+          start: date,
+          textColor: 'var(--accent-red)',
+          classNames: ['summary-wes'],
+          display: 'block'
+        });
+      }
+    }
+    return events;
+  }
+
+  function openDayPanel(dateStr) {
+    document.getElementById('panel-date').textContent = new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+    const dayTasks = calendarEvents.filter(t => t.start.startsWith(dateStr));
+    dayTasks.sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    const list = document.getElementById('panel-tasks');
+    list.innerHTML = '';
+
+    let inv = 0;
+    let wst = 0;
+
+    if (dayTasks.length === 0) {
+      list.innerHTML = '<div style="color:var(--text-secondary); text-align:center; margin-top:2rem;">No transactions recorded for this day.</div>';
+    } else {
+      dayTasks.forEach(t => {
+        const cost = t.extendedProps.cost;
+        const label = t.extendedProps.label;
+
+        if (label === 'Good' || label === 'Neutral') inv += cost;
+        else wst += cost;
+
+        const div = document.createElement('div');
+        div.className = `panel-task-item ${label}`;
+
+        const startTime = new Date(t.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const endTime = new Date(t.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="color:#fff; font-size:1rem;">${t.title.split(' ($')[0]}</strong>
+                    <span style="color:${label === 'Good' ? 'var(--accent-gold)' : label === 'Bad' ? 'var(--accent-red)' : '#888'}; font-weight:bold;">$${cost}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:0.3rem;">
+                     <span class="badge ${label === 'Good' ? 'badge-good' : label === 'Bad' ? 'badge-bad' : 'badge-neutral'}" style="font-size:0.7rem; padding:0.2rem 0.6rem;">${label}</span>
+                     <span style="font-size:0.85rem; color:#888;">${startTime} - ${endTime}</span>
+                </div>
+            `;
+        list.appendChild(div);
+      });
+    }
+
+    document.getElementById('p-invested').textContent = '$' + inv;
+    document.getElementById('p-wasted').textContent = '$' + wst;
+
+    const panel = document.getElementById('day-panel');
+    const overlay = document.getElementById('panel-overlay');
+    panel.classList.add('active');
+    overlay.classList.add('active');
+  }
+
+  function closeDayPanel() {
+    document.getElementById('day-panel').classList.remove('active');
+    document.getElementById('panel-overlay').classList.remove('active');
+  }
+</script>
+{% endblock %}
