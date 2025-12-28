@@ -5,3 +5,4 @@ pymysql
 weasyprint
 cryptography
 gunicorn
+flask-cors

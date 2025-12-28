@@ -1,77 +1,105 @@
 # SpenT - Time is Money
 
-SpenT is a web application that helps you track your time like money. Every second spent is a dollar counted. Start every day with $86,400 (representing seconds in a day) and invest it wisely in tasks, or watch it go to waste.
+![SpenT Logo](https://via.placeholder.com/150x150?text=SpenT)
 
-## Features
-- **Time = Currency**: 1 second = $1.
-- **Real-time Dashboard**: Live countdown of your daily budget.
-- **Task Money Tracking**: Tasks are "purchased" with time. Good tasks are investments; Bad tasks or untracked time are wasted.
-- **Auto-Routines**: Daily routines (Sleep, Meals) are automatically added to your day.
-- **Analytics**: Visualize your "Investment Portfolio" (Invested vs Wasted) with interactive charts.
-- **Calendar**: View your history of days and investments.
-- **PDF Export**: Download a report of your tasks.
-- **Dark & Gold Theme**: A premium, professional aesthetic.
+**SpenT** is a revolutionary productivity application that reimagines time management by treating time as a currency. In SpenT, every second is a dollar. You start each day with **$86,400** (representing the seconds in a 24-hour day), and your goal is to "invest" this capital wisely into productive tasks rather than letting it go to "waste".
 
-## Tech Stack
-- **Frontend**: HTML5, CSS3, JavaScript, Chart.js, FullCalendar.
-- **Backend**: Python (Flask), SQLAlchemy.
-- **Database**: MySQL.
-- **PDF Generation**: WeasyPrint.
+---
 
-## Setup Instructions
+## 🚀 Features
+
+-   **Time = Currency Logic**: Experience a unique metabolic shift in how you view time. 1 Second = $1.
+-   **Real-time Dashboard**: Watch your daily budget of $86,400 tick down in real-time.
+-   **Investment Tracking**: Log tasks as **Investments** (Good), **Neutral**, or **Waste** (Bad).
+-   **Financial Analytics**: Visualize your time usage with financial metaphors—view your "Portfolio Mix" and "Daily P&L".
+-   **Smart Routines**: Automatically deduct fixed costs (Sleep, Meals) to see your true disposable income.
+-   **PDF Reports**: Export professional reports of your time expenditure for accountability.
+-   **Cross-Platform**: Fully responsive design works seamlessly on Desktop, Tablet, and Mobile.
+
+## 🛠️ Tech Stack
+
+**Frontend**
+-   HTML5, CSS3 (Vanilla & Glassmorphism UI)
+-   JavaScript (ES6+)
+-   Chart.js for Analytics
+-   FullCalendar for History
+
+**Backend**
+-   Python (Flask)
+-   SQLAlchemy (ORM)
+-   Flask-Login (Authentication)
+-   WeasyPrint (PDF Generation)
+
+**Database**
+-   MySQL
+
+## 📦 Installation & Setup
+
+Follow these steps to get SpenT running on your local machine.
 
 ### Prerequisites
-- Python 3.8+
-- MySQL Server
-- GTK3 (for WeasyPrint on Windows) - *Optional, PDF export will fail gracefully without it.*
+-   Python 3.8 or higher
+-   MySQL Server installed and running
 
-### Installation
+### Steps
 
-1.  **Clone the repository/Download source**.
-
-2.  **Create and Activate Virtual Environment**:
+1.  **Clone the Repository**
     ```bash
-    python -m venv venv
+    git clone https://github.com/yourusername/spent.git
+    cd spent
+    ```
+
+2.  **Set up Virtual Environment**
+    ```bash
     # Windows
+    python -m venv venv
     venv\Scripts\activate
-    # Mac/Linux
+
+    # macOS/Linux
+    python3 -m venv venv
     source venv/bin/activate
     ```
 
-3.  **Install Dependencies**:
+3.  **Install Dependencies**
     ```bash
     pip install -r requirements.txt
     ```
 
-4.  **Database Setup**:
-    -   Log in to MySQL and create the database:
-        ```sql
-        CREATE DATABASE spent_db;
+4.  **Configure Database**
+    -   Create a MySQL database named `spent_db`.
+    -   Update `backend/config.py` with your database credentials:
+        ```python
+        SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:yourpassword@localhost/spent_db'
         ```
-    -   Update `backend/config.py` (if it exists) or `app.py` with your database credentials.
-        *Default expectation:* `mysql+pymysql://root:password@localhost/spent_db`
-    -   Run the application to auto-generate tables:
-        ```bash
-        cd backend
-        python app.py
-        ```
-        *(The app automatically calls `db.create_all()` on startup).*
 
-5.  **Run the Application**:
+5.  **Run the Application**
     ```bash
     cd backend
     python app.py
     ```
-    Access the app at `http://127.0.0.1:5000`.
+    The application will be available at `http://localhost:5000`.
 
-## Usage
-1.  **Sign Up** to create an account.
-2.  **Dashboard**: Watch your $86,400 tick away.
-3.  **Add Tasks**: Log what you are doing. Mark them as "Good" (Investment) or "Bad" (Waste).
-4.  **Review**: Check the Analytics tab to see if you are profitable with your time.
+## 🌐 Deployment
 
-## Project Structure
--   `backend/`: Flask application logic (routes, models).
--   `frontend/templates/`: HTML templates.
--   `frontend/static/`: CSS, JS, and images.
--   `schema.sql`: Database reference.
+### Netlify / Platform.sh / Heroku
+This application is correctly structured for deployment.
+-   **Procfile** is included for Gunicorn deployment.
+-   Ensure you set environment variables for `SECRET_KEY` and `SQLALCHEMY_DATABASE_URI` in your hosting provider.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1.  Fork the project
+2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+*Invest your time wisely.*
