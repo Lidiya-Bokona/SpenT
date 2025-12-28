@@ -13,6 +13,7 @@ class Config:
     else:
         # Fallback to SQLite if no database is configured (prevents crash on deployment)
         # WARNING: Data will be lost on serverless (Vercel/Netlify) restarts!
-        SQLALCHEMY_DATABASE_URI = "sqlite:///temp.db"
+        # Use /tmp for serverless write permissions
+        SQLALCHEMY_DATABASE_URI = "sqlite:////tmp/spenT.db"
         
     SQLALCHEMY_TRACK_MODIFICATIONS = False

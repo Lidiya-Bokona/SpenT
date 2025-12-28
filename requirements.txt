@@ -2,7 +2,7 @@ flask
 flask-sqlalchemy
 flask-login
 pymysql
-weasyprint
+
 cryptography
 gunicorn
 flask-cors
