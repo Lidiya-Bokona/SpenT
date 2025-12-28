@@ -1,0 +1,6 @@
+[build]
+  command = "pip install -r requirements.txt"
+  publish = "frontend"
+
+[dev]
+  command = "gunicorn --chdir backend app:app"
