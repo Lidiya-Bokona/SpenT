@@ -114,45 +114,61 @@
         }
 
         /* --- Navbar Logo Mini --- */
-        .nav-logo .analog-clock {
-            width: 32px;
-            height: 32px;
-            border: 1.5px solid var(--accent-gold);
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hero-logo-animated {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .hero-logo-animated .analog-clock {
+            width: 80px;
+            height: 80px;
+            border: 2px solid var(--accent-gold);
             border-radius: 50%;
             position: relative;
-            background: rgba(0, 0, 0, 0.4);
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            background: rgba(0, 0, 0, 0.3);
         }
 
-        .nav-logo .dollar-sign {
-            font-size: 14px;
+        .hero-logo-animated .dollar-sign {
+            font-size: 2rem;
             color: var(--accent-gold);
-            font-weight: 600;
-            line-height: 1;
+            font-weight: bold;
         }
 
-        .nav-logo .hand {
-            background: var(--accent-gold);
+        .hero-logo-animated .hand {
             position: absolute;
             bottom: 50%;
             left: 50%;
+            background: var(--accent-gold);
             transform-origin: bottom center;
-            border-radius: 1px;
-            z-index: 2;
+            border-radius: 2px;
         }
 
-        .nav-logo .hour-hand {
-            width: 1.5px;
-            height: 8px;
-            animation: rotate 12s linear infinite;
+        .hero-logo-animated .hour-hand {
+            width: 2px;
+            height: 20px;
+            transform: rotate(90deg);
+            animation: spin 12s linear infinite;
         }
 
-        .nav-logo .minute-hand {
+        .hero-logo-animated .minute-hand {
             width: 1px;
-            height: 12px;
-            animation: rotate 2s linear infinite;
+            height: 30px;
+            transform: rotate(180deg);
+            animation: spin 2s linear infinite;
+            /* Fast spin for effect */
+            opacity: 0.7;
         }
 
         /* --- Hero Section --- */
@@ -425,7 +441,7 @@
 
             <div class="cta-group">
                 <a href="{{ url_for('auth.signup') }}" class="btn-large btn-gold">Start Investing</a>
-                <a href="{{ url_for('auth.login') }}" class="btn-large btn-outline">Access Ledger</a>
+                <a href="{{ url_for('auth.login') }}" class="btn-large btn-outline">Log In</a>
             </div>
         </div>
     </section>
