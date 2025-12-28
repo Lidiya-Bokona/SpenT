@@ -4,3 +4,4 @@ flask-login
 pymysql
 weasyprint
 cryptography
+gunicorn

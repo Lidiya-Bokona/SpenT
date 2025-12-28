@@ -86,6 +86,28 @@
     </div>
   </div>
 
+  <!-- Today's Snapshot -->
+  <h3 style="color: var(--accent-gold); margin-bottom: 1rem; font-size: 1.1rem; text-transform: uppercase;">Today's
+    Snapshot</h3>
+  <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
+    <div class="glass-card stat-card" style="border-left: 3px solid var(--accent-green);">
+      <div class="stat-label">Invested Today</div>
+      <div class="stat-value" id="today-invested" style="font-size: 1.5rem; color: var(--accent-green);">Loading...
+      </div>
+      <div class="subtext" style="font-size: 0.8rem;">Growth Focus</div>
+    </div>
+    <div class="glass-card stat-card" style="border-left: 3px solid #ff4d4d;">
+      <div class="stat-label">Wasted Today</div>
+      <div class="stat-value currency-red" id="today-wasted" style="font-size: 1.5rem;">Loading...</div>
+      <div class="subtext" style="font-size: 0.8rem;">Missed Opportunity</div>
+    </div>
+    <div class="glass-card stat-card" style="border-left: 3px solid #4dabf7;">
+      <div class="stat-label">Tasks Today</div>
+      <div class="stat-value" id="today-tasks" style="font-size: 1.5rem; color: #4dabf7;">Loading...</div>
+      <div class="subtext" style="font-size: 0.8rem;">Daily Activity</div>
+    </div>
+  </div>
+
   <!-- Charts Grid -->
 
   <!-- Row 1: Daily Trends (Line) -->
@@ -174,7 +196,11 @@
       document.getElementById('total-wasted').textContent = '$' + data.total_wasted.toLocaleString();
       document.getElementById('avg-daily').textContent = '$' + data.avg_daily_investment.toLocaleString();
       document.getElementById('total-tasks').textContent = data.total_tasks.toLocaleString();
-      document.getElementById('total-tasks').textContent = data.total_tasks.toLocaleString();
+
+      // Today's Stats
+      document.getElementById('today-invested').textContent = '$' + data.today_invested.toLocaleString();
+      document.getElementById('today-wasted').textContent = '$' + data.today_wasted.toLocaleString();
+      document.getElementById('today-tasks').textContent = data.today_tasks.toLocaleString();
     } catch (e) {
       console.error(e);
       document.getElementById('total-invested').textContent = 'Error'; // Feedback to user
@@ -325,7 +351,7 @@
 
     // Load Logo
     const img = new Image();
-    img.src = '/static/img/logo.png';
+    img.src = '/static/img/logo.jpg';
     await new Promise(r => img.onload = r);
 
     // Header Background
@@ -375,6 +401,29 @@
       headStyles: { fillColor: [212, 175, 55], textColor: [0, 0, 0], fontStyle: 'bold' },
       styles: { fontSize: 11, cellPadding: 4 },
       columnStyles: { 0: { fontStyle: 'bold', width: 80 } }
+    });
+
+    // Today's Stats Section in PDF
+    const todayY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Today's Performance", 15, todayY);
+
+    const todayInvested = document.getElementById('today-invested').textContent;
+    const todayWasted = document.getElementById('today-wasted').textContent;
+    const todayTasks = document.getElementById('today-tasks').textContent;
+
+    doc.autoTable({
+      startY: todayY + 5,
+      head: [['Metric', 'Value']],
+      body: [
+        ['Invested Today', todayInvested],
+        ['Wasted Today', todayWasted],
+        ['Tasks Logged', todayTasks]
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [70, 70, 70], textColor: [255, 255, 255] },
+      styles: { fontSize: 11, cellPadding: 4 }
     });
 
     // Leaderboard Section

@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
+import traceback
 from flask_login import login_required, current_user
 from models import Task, DailySummary
 from datetime import datetime, timedelta
@@ -57,6 +58,7 @@ def get_chart_data():
         })
     except Exception as e:
         print(f"Error in chart-data: {e}")
+        traceback.print_exc()
         return jsonify({'labels': [], 'invested': [], 'wasted': []}), 500
 
 @analytics_bp.route('/api/analytics/leaderboard', methods=['GET'])
@@ -96,6 +98,7 @@ def get_leaderboard():
         })
     except Exception as e:
         print(f"Error in leaderboard: {e}")
+        traceback.print_exc()
         return jsonify({'assets': [], 'liabilities': []}), 500
 
 @analytics_bp.route('/api/analytics/summary', methods=['GET'])
@@ -135,14 +138,30 @@ def get_summary_stats():
         
         avg_daily_investment = total_invested / days_count if days_count > 0 else 0
         
+        # Calculate Today's Stats specifically
+        today_date = datetime.now().date()
+        today_tasks = Task.query.filter(Task.user_id == current_user.id, Task.date_stamp == today_date).all()
+        
+        today_invested = sum([(t.end_time - t.start_time).total_seconds() for t in today_tasks if t.label in ['Good', 'Neutral']])
+        
+        # Calculate today's wasted
+        now_seconds = (datetime.now() - datetime.combine(today_date, datetime.min.time())).total_seconds()
+        today_wasted = max(0, now_seconds - today_invested)
+        
+        today_count = len(today_tasks)
+
         return jsonify({
             'total_invested': int(total_invested),
             'total_wasted': int(total_wasted),
             'avg_daily_investment': int(avg_daily_investment),
-            'total_tasks': len(tasks)
+            'total_tasks': len(tasks),
+            'today_invested': int(today_invested),
+            'today_wasted': int(today_wasted),
+            'today_tasks': today_count
         })
     except Exception as e:
         print(f"Error in summary: {e}")
+        traceback.print_exc()
         return jsonify({'total_invested': 0, 'total_wasted': 0, 'avg_daily_investment': 0, 'total_tasks': 0}), 500
 
 @analytics_bp.route('/api/analytics/categories', methods=['GET'])
