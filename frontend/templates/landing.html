@@ -5,128 +5,386 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpenT - Spend Your Time Like Money</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Landing Specific Overrides if needed, though style.css should handle most */
+        :root {
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #141414;
+            --accent-gold: #D4AF37;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --card-glass: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* --- Navbar --- */
+        .landing-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-logo i {
+            color: var(--accent-gold);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .btn-nav-primary {
+            background: var(--accent-gold);
+            color: #000;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* --- Hero Section --- */
         .landing-hero {
+            position: relative;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            padding: 2rem;
             text-align: center;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 70%);
+        }
+
+        .hero-bg-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60vw;
+            height: 60vw;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+            z-index: 1;
+            pointer-events: none;
         }
 
         .hero-content {
-            max-width: 800px;
-            padding: 3rem;
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            animation: fadeIn Up 1s ease-out;
         }
 
-        .hero-logo .analog-clock {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-            border: 3px solid var(--accent-gold, #D4AF37);
+        /* Logo Animation */
+        .hero-logo-container {
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
         }
 
-        .hero-logo .dollar-sign {
-            font-size: 40px;
+        .analog-clock-logo {
+            width: 140px;
+            height: 140px;
+            border: 3px solid var(--accent-gold);
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
+        }
+
+        .clock-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3.5rem;
+            color: var(--accent-gold);
+            font-weight: 300;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .clock-hand {
+            background: var(--accent-gold);
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 4px;
+        }
+
+        .hand-hour {
+            width: 4px;
+            height: 35px;
+            animation: rotate 12s linear infinite;
+        }
+
+        .hand-minute {
+            width: 2px;
+            height: 55px;
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: translateX(-50%) rotate(0deg);
+            }
+
+            to {
+                transform: translateX(-50%) rotate(360deg);
+            }
         }
 
         h1 {
-            font-size: 4rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(45deg, #fff, #888);
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            line-height: 1;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 20%, #888 100%);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
         }
 
         .tagline {
-            font-size: 1.5rem;
-            color: var(--accent-gold, #D4AF37);
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: var(--accent-gold);
             margin-bottom: 2rem;
             font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .description {
-            font-size: 1.1rem;
-            color: var(--text-secondary, #aaa);
-            margin-bottom: 3rem;
-            line-height: 1.6;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin: 0 auto 3.5rem;
+            line-height: 1.7;
+            max-width: 650px;
         }
 
-        .cta-buttons {
+        .description strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .cta-group {
             display: flex;
             gap: 1.5rem;
             justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-large {
+            padding: 1rem 3rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
         }
 
         .btn-gold {
-            background: var(--accent-gold, #D4AF37);
+            background: var(--accent-gold);
             color: #000;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
         }
 
         .btn-gold:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+            background: #e6c257;
+            box-shadow: 0 0 35px rgba(212, 175, 55, 0.5);
+            transform: translateY(-3px);
         }
 
-        .btn-dark {
+        .btn-outline {
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
             background: transparent;
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: background 0.2s;
         }
 
-        .btn-dark:hover {
+        .btn-outline:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        /* --- Features Section --- */
+        .features {
+            padding: 6rem 2rem;
+            background: var(--secondary-bg);
+            border-top: 1px solid var(--card-border);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 4rem;
+            color: var(--text-primary);
+        }
+
+        .section-title span {
+            color: var(--accent-gold);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 2.5rem;
+            border-radius: 12px;
+            text-align: left;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
             background: rgba(255, 255, 255, 0.05);
-            border-color: #fff;
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        /* --- Footer --- */
+        footer {
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
     </style>
 </head>
 
 <body>
-    <div class="landing-hero">
-        <div class="hero-content fade-in">
-            <div class="hero-logo-animated large">
-                <div class="analog-clock">
-                    <div class="dollar-sign">$</div>
-                    <div class="hand hour-hand"></div>
-                    <div class="hand minute-hand"></div>
+
+    <nav class="landing-nav">
+        <a href="#" class="nav-logo">
+            <i class="fas fa-clock"></i> SpenT
+        </a>
+        <div class="nav-links">
+            <a href="{{ url_for('auth.login') }}" class="nav-link">Log In</a>
+            <a href="{{ url_for('auth.signup') }}" class="btn-nav-primary">Sign Up</a>
+        </div>
+    </nav>
+
+    <section class="landing-hero">
+        <div class="hero-bg-glow"></div>
+        <div class="hero-content">
+            <div class="hero-logo-container">
+                <div class="analog-clock-logo">
+                    <div class="clock-center">$</div>
+                    <div class="clock-hand hand-hour"></div>
+                    <div class="clock-hand hand-minute"></div>
                 </div>
             </div>
 
-            <h1 class="hero-title">SpenT</h1>
-            <p class="tagline">Spend your time like money.</p>
+            <h1>SpenT</h1>
+            <p class="tagline">Time Is Money. Invest It Wisely.</p>
 
             <p class="description">
-                Every day, you’re given <strong>$86,400</strong> in seconds. No matter what, it runs out by midnight.
-                <br><br>
-                What matters is where you spend it. The more you invest in meaningful tasks, the greater your return on
-                investment.
+                You receive <strong>$86,400</strong> worth of seconds every single day.
+                Do you simply let it slip away, or do you invest it to build your future?
+                Track, analyze, and optimize your most valuable asset.
             </p>
 
-            <div class="cta-buttons">
-                <a href="{{ url_for('auth.signup') }}" class="btn btn-primary glowing-border"
-                    style="font-size: 1.1rem; padding: 1rem 2.5rem; border-radius: 50px;">Start Investing</a>
-                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary"
-                    style="font-size: 1.1rem; padding: 1rem 2.5rem; border-radius: 50px;">Log In</a>
+            <div class="cta-group">
+                <a href="{{ url_for('auth.signup') }}" class="btn-large btn-gold">Start Investing</a>
+                <a href="{{ url_for('auth.login') }}" class="btn-large btn-outline">Access Ledger</a>
             </div>
         </div>
-    </div>
+    </section>
+
+    <section class="features">
+        <h2 class="section-title">Why <span>SpenT</span>?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Track Every Second</h3>
+                <p style="color:var(--text-secondary);">Log your daily activities as financial transactions. See exactly
+                    where your time wealth goes each day.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-balance-scale"></i></div>
+                <h3>Invest vs. Waste</h3>
+                <p style="color:var(--text-secondary);">Categorize time as "Investment" (growth) or "Expense" (waste).
+                    Visualize your ROI with intuitive dashboards.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-history"></i></div>
+                <h3>Build Better Habits</h3>
+                <p style="color:var(--text-secondary);">Analyze trends over time. Identify time leaks and optimize your
+                    schedule for maximum productivity.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 SpenT. All rights reserved. Time is Currency.</p>
+    </footer>
+
 </body>
 
 </html>

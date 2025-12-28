@@ -107,6 +107,9 @@ body {
 .nav-links a.active {
     color: var(--accent-gold);
     opacity: 1;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 4px;
 }
 
 /* Layout */
@@ -484,19 +487,22 @@ label {
     padding: 0.3rem;
     border-radius: 8px;
     border: 1px solid var(--glass-border);
+    flex-wrap: wrap;
 }
 
 .recurrence-btn {
     flex: 1;
     background: transparent;
-    border: none;
+    border: 1px solid transparent;
     color: var(--text-secondary);
-    padding: 0.5rem;
+    padding: 0.6rem 0.5rem;
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 500;
     transition: all 0.2s;
+    white-space: nowrap;
+    text-align: center;
 }
 
 .recurrence-btn:hover {
@@ -517,6 +523,9 @@ label {
     justify-content: space-between;
     gap: 0.5rem;
     margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
 }
 
 .day-btn {
@@ -530,7 +539,7 @@ label {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     transition: all 0.2s;
 }
@@ -545,6 +554,29 @@ label {
     color: #000;
     border-color: var(--accent-gold);
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+/* Glowing Border Animation */
+@keyframes borderGlow {
+    0% {
+        border-color: rgba(212, 175, 55, 0.5);
+        box-shadow: 0 0 5px rgba(212, 175, 55, 0.2);
+    }
+
+    50% {
+        border-color: rgba(212, 175, 55, 1);
+        box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+    }
+
+    100% {
+        border-color: rgba(212, 175, 55, 0.5);
+        box-shadow: 0 0 5px rgba(212, 175, 55, 0.2);
+    }
+}
+
+.glowing-border {
+    border: 1px solid var(--accent-gold);
+    animation: borderGlow 3s infinite;
 }
 
 /* Action Icons */

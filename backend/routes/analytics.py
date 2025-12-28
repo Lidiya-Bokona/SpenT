@@ -12,7 +12,8 @@ analytics_bp = Blueprint('analytics', __name__)
 def get_chart_data():
     range_val = request.args.get('range', '7d')
     days = 7
-    if range_val == '30d': days = 30
+    if range_val == '1d': days = 1
+    elif range_val == '30d': days = 30
     elif range_val == '365d': days = 365
     
     today = datetime.now().date()
@@ -64,7 +65,8 @@ def get_leaderboard():
     try:
         range_val = request.args.get('range', '7d')
         days = 7
-        if range_val == '30d': days = 30
+        if range_val == '1d': days = 1
+        elif range_val == '30d': days = 30
         elif range_val == '365d': days = 365
         
         start_date = datetime.now().date() - timedelta(days=days-1)
@@ -106,7 +108,8 @@ def get_summary_stats():
         
         if range_val != 'lifetime':
             days = 7
-            if range_val == '30d': days = 30
+            if range_val == '1d': days = 1
+            elif range_val == '30d': days = 30
             elif range_val == '365d': days = 365
             start_date = datetime.now().date() - timedelta(days=days-1)
             query = query.filter(Task.date_stamp >= start_date)
@@ -121,6 +124,7 @@ def get_summary_stats():
             days_count = (datetime.now().date() - start).days + 1
         else:
             days = 7
+            if range_val == '1d': days = 1
             if range_val == '30d': days = 30
             elif range_val == '365d': days = 365
             start = datetime.now().date() - timedelta(days=days-1)
@@ -147,7 +151,8 @@ def get_category_breakdown():
     try:
         range_val = request.args.get('range', '7d')
         days = 7
-        if range_val == '30d': days = 30
+        if range_val == '1d': days = 1
+        elif range_val == '30d': days = 30
         elif range_val == '365d': days = 365
         
         start_date = datetime.now().date() - timedelta(days=days-1)
@@ -176,7 +181,8 @@ def get_time_distribution():
     try:
         range_val = request.args.get('range', '7d')
         days = 7
-        if range_val == '30d': days = 30
+        if range_val == '1d': days = 1
+        elif range_val == '30d': days = 30
         elif range_val == '365d': days = 365
         
         start_date = datetime.now().date() - timedelta(days=days-1)

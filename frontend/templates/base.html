@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpenT - Time is Money</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,9 +26,12 @@
         </div>
         <div class="nav-links">
             {% if current_user.is_authenticated %}
-            <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
-            <a href="{{ url_for('dashboard.calendar_view') }}">Calendar</a>
-            <a href="{{ url_for('dashboard.analytics_view') }}">Analytics</a>
+            <a href="{{ url_for('dashboard.index') }}"
+                class="{% if request.endpoint == 'dashboard.index' %}active{% endif %}">Dashboard</a>
+            <a href="{{ url_for('dashboard.calendar_view') }}"
+                class="{% if request.endpoint == 'dashboard.calendar_view' %}active{% endif %}">Calendar</a>
+            <a href="{{ url_for('dashboard.analytics_view') }}"
+                class="{% if request.endpoint == 'dashboard.analytics_view' %}active{% endif %}">Analytics</a>
             <a href="{{ url_for('auth.logout') }}">Logout</a>
             {% else %}
             <a href="{{ url_for('auth.login') }}">Login</a>

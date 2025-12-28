@@ -62,6 +62,7 @@
     </div>
     <form id="modal-task-form" class="modern-form">
       <input type="hidden" id="task-id">
+      <h4 id="form-message" style="color: red; display: none; margin-bottom: 1rem;"></h4>
 
       <div class="form-group">
         <label>Task Name</label>
@@ -132,22 +133,27 @@
       <div class="form-group hidden fade-in" id="routine-options">
         <label style="margin-bottom:0.5rem; display:block;">Frequency</label>
         <div class="recurrence-options">
-          <select id="m-recurrence-type" class="modern-select">
-            <option value="Daily">Daily (Every Day)</option>
-            <option value="Weekdays">Weekdays (Mon-Fri)</option>
-            <option value="Weekends">Weekends (Sat-Sun)</option>
-            <option value="Custom">Custom Days</option>
-          </select>
+          <!-- Hidden input to store value -->
+          <input type="hidden" id="m-recurrence-type" value="Daily">
+
+          <button type="button" class="recurrence-btn active" onclick="setRecurrence('Daily')"
+            data-value="Daily">Daily</button>
+          <button type="button" class="recurrence-btn" onclick="setRecurrence('Weekdays')"
+            data-value="Weekdays">Weekdays</button>
+          <button type="button" class="recurrence-btn" onclick="setRecurrence('Weekends')"
+            data-value="Weekends">Weekends</button>
+          <button type="button" class="recurrence-btn" onclick="setRecurrence('Custom')"
+            data-value="Custom">Custom</button>
         </div>
 
         <div class="custom-days-selector hidden" id="custom-days-container" style="margin-top:1rem;">
-          <label><input type="checkbox" class="day-checkbox" value="Mon"><span class="day-label">M</span></label>
-          <label><input type="checkbox" class="day-checkbox" value="Tue"><span class="day-label">T</span></label>
-          <label><input type="checkbox" class="day-checkbox" value="Wed"><span class="day-label">W</span></label>
-          <label><input type="checkbox" class="day-checkbox" value="Thu"><span class="day-label">T</span></label>
-          <label><input type="checkbox" class="day-checkbox" value="Fri"><span class="day-label">F</span></label>
-          <label><input type="checkbox" class="day-checkbox" value="Sat"><span class="day-label">S</span></label>
-          <label><input type="checkbox" class="day-checkbox" value="Sun"><span class="day-label">S</span></label>
+          <div class="day-btn" onclick="toggleDay(this)" data-day="Mon">M</div>
+          <div class="day-btn" onclick="toggleDay(this)" data-day="Tue">T</div>
+          <div class="day-btn" onclick="toggleDay(this)" data-day="Wed">W</div>
+          <div class="day-btn" onclick="toggleDay(this)" data-day="Thu">T</div>
+          <div class="day-btn" onclick="toggleDay(this)" data-day="Fri">F</div>
+          <div class="day-btn" onclick="toggleDay(this)" data-day="Sat">S</div>
+          <div class="day-btn" onclick="toggleDay(this)" data-day="Sun">S</div>
         </div>
       </div>
 

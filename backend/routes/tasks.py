@@ -64,6 +64,7 @@ def add_task():
         # flash(f"Hello {current_user.username}, this is your balance for today.", "success") # Removed per request
         
         if request.is_json:
+             print(f"DEBUG: Task added successfully - {task.name}")
              return jsonify({'success': True, 'message': 'Task added'})
         return redirect(url_for('dashboard.index'))
         

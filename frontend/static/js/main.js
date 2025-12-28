@@ -246,29 +246,31 @@ document.getElementById('m-is-routine').addEventListener('change', function () {
 });
 
 // New Recurrence Button Logic
-document.querySelectorAll('.recurrence-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-        // Remove active from all
-        document.querySelectorAll('.recurrence-btn').forEach(b => b.classList.remove('active'));
-        // Add active to clicked
-        this.classList.add('active');
-        // Update hidden input
-        const val = this.dataset.value;
-        document.getElementById('m-recurrence-type').value = val;
+function setRecurrence(val) {
+    // Remove active from all
+    document.querySelectorAll('.recurrence-btn').forEach(b => b.classList.remove('active'));
 
-        // Show/Hide Custom Days
-        const custom = document.getElementById('custom-days-container');
-        if (val === 'Custom') custom.classList.remove('hidden');
-        else custom.classList.add('hidden');
-    });
-});
+    // Add active to clicked (using data-value to find it, or we could pass 'this' but strict value match is safer)
+    const btn = document.querySelector(`.recurrence-btn[data-value="${val}"]`);
+    if (btn) btn.classList.add('active');
+
+    // Update hidden input
+    document.getElementById('m-recurrence-type').value = val;
+
+    // Show/Hide Custom Days
+    const custom = document.getElementById('custom-days-container');
+    if (val === 'Custom') custom.classList.remove('hidden');
+    else custom.classList.add('hidden');
+}
 
 // New Day Button Logic
-document.querySelectorAll('.day-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-        this.classList.toggle('active');
-    });
-});
+function toggleDay(el) {
+    el.classList.toggle('active');
+}
+
+// Expose to window
+window.setRecurrence = setRecurrence;
+window.toggleDay = toggleDay;
 
 
 // Submit Form
@@ -289,13 +291,23 @@ document.getElementById('modal-task-form').addEventListener('submit', async (e) 
         repeatDays = checked.join(',');
     }
 
-    // Get Label from Select
-    const label = document.getElementById('m-task-label').value;
+    // Get Label from Radio Buttons directly
+    const selectedRadio = document.querySelector('input[name="category"]:checked');
+    const label = selectedRadio ? selectedRadio.value : 'Good';
+
+    // Time Validation
+    const startTime = document.getElementById('m-task-start').value;
+    const endTime = document.getElementById('m-task-end').value;
+
+    if (startTime >= endTime) {
+        alert("End time must be after start time.");
+        return;
+    }
 
     const data = {
         name: document.getElementById('m-task-name').value,
-        start_time: document.getElementById('m-task-start').value,
-        end_time: document.getElementById('m-task-end').value,
+        start_time: startTime,
+        end_time: endTime,
         label: label,
         description: document.getElementById('m-task-desc').value,
         is_routine: isRoutine,
@@ -315,7 +327,7 @@ document.getElementById('modal-task-form').addEventListener('submit', async (e) 
         loadDashboardData();
     } else {
         const res = await response.json();
-        console.error(res.message);
+        alert(res.message || "Failed to save task");
     }
 });
 
