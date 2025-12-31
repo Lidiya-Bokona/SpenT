@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SpenT</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <nav class="navbar glass">
+        <div class="logo">
+            <img src="static/logo.png" alt="SpenT Logo" class="logo-img"> SpenT
+        </div>
+        <div class="nav-links">
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <div class="date-display" id="current-date"></div>
+            <div class="time-display" id="current-time"></div>
+        </div>
+
+        <div class="balance-card glass-card">
+            <h3>Daily Balance</h3>
+            <div class="countdown" id="countdown">
+                $<span id="money-counter">...</span>
+            </div>
+            <p class="subtext">Time Remaining</p>
+        </div>
+
+        <div class="metrics-row">
+            <div class="metric-card glass-card">
+                <div class="metric-info">
+                    <h4>Invested Today</h4>
+                    <div class="metric-value currency-gold">$<span id="invested-today">0</span></div>
+                </div>
+                <div class="trend-icon trend-up">📈</div>
+            </div>
+            <div class="metric-card glass-card">
+                <div class="metric-info">
+                    <h4>Wasted Today</h4>
+                    <div class="metric-value currency-red">$<span id="wasted-today">0</span></div>
+                </div>
+                <div class="trend-icon trend-down">📉</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="tasks-section" style="width: 100%;">
+                <div class="section-header">
+                    <h3>Today's Ledger</h3>
+                    <button class="btn btn-primary" onclick="openByModal()">+ Add Task</button>
+                </div>
+
+                <div class="task-list" id="task-list">
+                    <!-- Tasks loaded via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal-overlay" id="task-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Task</h3>
+                <button class="close-modal-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="modal-task-form">
+                <input type="hidden" id="task-id">
+
+                <div class="form-group">
+                    <label>Task Name</label>
+                    <input type="text" id="m-task-name" placeholder="E.g. Read Book" required>
+                </div>
+
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label>Start Time</label>
+                        <input type="time" id="m-task-start" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>End Time</label>
+                        <input type="time" id="m-task-end" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="m-task-label" required>
+                        <option value="Good">Investment (Good)</option>
+                        <option value="Neutral">Neutral</option>
+                        <option value="Bad">Expense/Waste (Bad)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Description (Optional)</label>
+                    <textarea id="m-task-desc" rows="3" placeholder="Details..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="m-is-routine" style="width: auto;">
+                        This is a Routine Task
+                    </label>
+                </div>
+
+                <div class="form-group hidden" id="routine-options">
+                    <label>Repeat On</label>
+                    <div class="recurrence-options">
+                        <button type="button" class="recurrence-btn active" data-value="Daily">Daily</button>
+                        <button type="button" class="recurrence-btn" data-value="Weekdays">Weekdays</button>
+                        <button type="button" class="recurrence-btn" data-value="Weekends">Weekends</button>
+                        <button type="button" class="recurrence-btn" data-value="Custom">Custom</button>
+                    </div>
+                    <input type="hidden" id="m-recurrence-type" value="Daily">
+
+                    <div class="custom-days-selector hidden" id="custom-days-container">
+                        <button type="button" class="day-btn" data-day="Mon">M</button>
+                        <button type="button" class="day-btn" data-day="Tue">T</button>
+                        <button type="button" class="day-btn" data-day="Wed">W</button>
+                        <button type="button" class="day-btn" data-day="Thu">T</button>
+                        <button type="button" class="day-btn" data-day="Fri">F</button>
+                        <button type="button" class="day-btn" data-day="Sat">S</button>
+                        <button type="button" class="day-btn" data-day="Sun">S</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary full-width" style="width: 100%; margin-top: 1rem;">Save
+                    Transaction</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="stats-section glass-card">
+        <h3>Overview</h3>
+        <canvas id="dailyChart"></canvas>
+    </div>
+    </div>
+    </div>
+
+    <script src="static/js/main.js"></script>
+    <script>
+        // Init dashboard on load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth().then(auth => {
+                if (!auth) window.location.href = 'login.html';
+                else loadDashboardData();
+            });
+        });
+    </script>
+</body>
+
+</html>
