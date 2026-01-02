@@ -13,17 +13,30 @@
 <body>
     <nav class="navbar glass">
         <div class="logo">
-            <img src="static/logo.png" alt="SpenT Logo" class="logo-img"> SpenT
+            <a href="index.html"
+                style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
+                <div class="hero-logo-animated nav-logo" style="margin:0; width:40px; height:40px;">
+                    <div class="analog-clock" style="width:40px; height:40px; border-width:1px;">
+                        <div class="dollar-sign" style="font-size:1rem;">$</div>
+                        <div class="hand hour-hand" style="height:10px;"></div>
+                        <div class="hand minute-hand" style="height:15px;"></div>
+                    </div>
+                </div>
+                SpenT
+            </a>
         </div>
         <div class="nav-links">
-            <a href="#" onclick="logout()">Logout</a>
+            <a href="index.html">Home</a>
+            <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="calendar.html">Calendar</a>
+            <a href="analytics.html">Analytics</a>
         </div>
     </nav>
 
     <div class="container">
         <div class="dashboard-header">
-            <div class="date-display" id="current-date"></div>
-            <div class="time-display" id="current-time"></div>
+            <h2 id="welcome-message" style="margin:0; color:var(--accent-gold);">Welcome</h2>
+            <div class="time-display" id="current-time" style="font-size:1.2rem; color:var(--text-secondary);"></div>
         </div>
 
         <div class="balance-card glass-card">

@@ -1,103 +1,60 @@
 // --- Constants & Config ---
 const STORAGE_KEYS = {
-    USERS: 'spent_users',
-    CURRENT_USER: 'spent_current_user',
+    // USERS key no longer needed really, but we'll keep for legacy struct if we want
     TASKS: 'spent_tasks'
 };
 
 // --- Storage Manager ---
 const Storage = {
-    getUsers: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]'),
-    setUsers: (users) => localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users)),
-
-    getCurrentUser: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER)),
-    setCurrentUser: (user) => localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user)),
-    removeCurrentUser: () => localStorage.removeItem(STORAGE_KEYS.CURRENT_USER),
-
+    // Simplified: No user list needed, just "Default User" context
     getTasks: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.TASKS) || '[]'),
     setTasks: (tasks) => localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks))
 };
 
-// --- Auth Functions ---
+// --- Auth Functions (Stubbed for No-Auth) ---
 async function checkAuth() {
-    const user = Storage.getCurrentUser();
-    return !!user;
+    return true; // Always authenticated
 }
 
-async function login(email, password) {
-    // Simulate network delay
-    await new Promise(r => setTimeout(r, 300));
-
-    const users = Storage.getUsers();
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (user) {
-        Storage.setCurrentUser({ id: user.id, username: user.username, email: user.email });
-        return { success: true };
-    }
-    return { success: false, message: 'Invalid credentials' };
-}
-
-async function signup(username, email, password) {
-    await new Promise(r => setTimeout(r, 300));
-
-    const users = Storage.getUsers();
-    if (users.find(u => u.email === email)) {
-        return { success: false, message: 'Email already exists' };
-    }
-
-    const newUser = {
-        id: Date.now(),
-        username,
-        email,
-        password // In a real app never store plain text, but for local static demo it's fine
-    };
-
-    users.push(newUser);
-    Storage.setUsers(users);
-
-    // Auto login
-    // Storage.setCurrentUser({ id: newUser.id, username, email });
-    return { success: true };
-}
-
-async function logout() {
-    Storage.removeCurrentUser();
-    window.location.href = 'index.html'; // Changed from / to index.html for static file support
-}
+// Ensure a "session" exists implicitly
+const DEFAULT_USER_ID = 1;
 
 // --- Data Logic (The "Backend") ---
 
-function getFinancials(tasks = []) {
+function getFinancials(tasks = [], dateStr = null) {
     let invested = 0;
-    let wasted = 0;
-    // Assuming 24h = 86400 seconds. 
-    // We calculate "Invested" as sum of contents of tasks labeled 'Good' + 'Neutral'? 
-    // Or 'Good' only? The prompt said "Invested Today (sum of Good and Neutral)".
-    // "Wasted Today (sum of Bad tasks and untracked time gaps)".
-
-    // In this static mock, we'll calculate strictly from tasks for now.
-    // However, the "Money" metaphor implies we start with 86400.
+    let explicitWasted = 0;
+    let totalLogged = 0;
 
     tasks.forEach(t => {
         const duration = getDurationSeconds(t.start_time, t.end_time);
+        totalLogged += duration;
         if (t.label === 'Good' || t.label === 'Neutral') {
             invested += duration;
         } else {
-            wasted += duration;
+            explicitWasted += duration;
         }
     });
 
-    // Untracked time = 86400 - (invested + wasted) -> treated as Wasted per prompt logic? 
-    // "untracked time gaps" -> generally yes. 
-    // But for "Today's Ledger", we might just show what has passed so far?
-    // Let's stick to the prompt: "ensure the sum of all time always equals $86,400" is tricky for *future* time.
-    // Interpretation: "Balance" is what's left.
-    // "Invested" + "Wasted" (logged) + "Remaining" = 86400.
+    // Calculate Untracked based on "Time Passed"
+    // If date is today, time passed = now. If past date, time passed = 86400.
+    let secondsPassed = 86400; // Default to full day (past)
 
-    // Actually, usually "Wasted" includes bad habits. 
+    if (dateStr) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (dateStr === todayStr) {
+            const now = new Date();
+            secondsPassed = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        }
+    }
 
-    return { invested, wasted };
+    // Ensure we don't have negative untracked (e.g. overlapping tasks logging > time passed)
+    let untracked = Math.max(0, secondsPassed - totalLogged);
+
+    // "Automatically wasted" = Untracked + Explicit Bad
+    let totalWasted = explicitWasted + untracked;
+
+    return { invested, wasted: totalWasted, untracked, explicitWasted };
 }
 
 function getDurationSeconds(start, end) {
@@ -115,32 +72,21 @@ function getDurationSeconds(start, end) {
 let allTasks = []; // Store locally for editing
 
 async function loadDashboardData() {
-    const user = Storage.getCurrentUser();
-    if (!user) {
-        window.location.href = 'login.html';
-        return;
-    }
-
     // Filter tasks for TODAY
     const rawTasks = Storage.getTasks();
     const todayStr = new Date().toISOString().split('T')[0];
 
-    // In our simple model, we might not store dates in the task object per the previous code?
-    // Previous code: `tasks` array. Let's look at the structure.
-    // If not, we will add 'date' field to new tasks. Old tasks might miss it.
-    // For this migration, we'll assume we show ALL tasks or just today's. 
-    // Let's modify save logic to include date.
+    // We treat all tasks as belonging to the default user now
+    // If migration from old version: we might ignore user_id or just show all.
+    // For safety, let's just show all tasks that match today's date.
 
-    allTasks = rawTasks.filter(t => t.user_id === user.id && t.date === todayStr);
+    allTasks = rawTasks.filter(t => t.date === todayStr);
 
     // Calculate Stats
-    const { invested, wasted } = getFinancials(allTasks);
+    // Pass today's date to handle "Untracked time" logic relative to NOW
+    const { invested, wasted } = getFinancials(allTasks, todayStr);
 
     // Calculate Remaining (Time Left in the Day)
-    // Actually, "Balance" is usually (Seconds in Day - Seconds Passed).
-    // Or is it (Seconds in Day - Seconds Logged)?
-    // The previous prompt said: "Time Remaining" -> countdown.
-
     const now = new Date();
     const secondsPassed = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
     const secondsInDay = 86400;
@@ -151,9 +97,6 @@ async function loadDashboardData() {
 
     const invEl = document.getElementById('invested-today');
     const wasEl = document.getElementById('wasted-today');
-
-    // For price tags on tasks, we assume $1 = 1 second for simplicity of the prompt "Time is Money"?
-    // Or is it arbitrary? The prompt said "start with $86,400 (seconds)". So 1s = $1.
 
     if (invEl) invEl.textContent = invested.toLocaleString();
     if (wasEl) wasEl.textContent = wasted.toLocaleString();
@@ -223,25 +166,35 @@ function renderTasks(tasks) {
 
 document.addEventListener('DOMContentLoaded', () => {
     // ... (Clock setup exists in old code, preserving)
+    // Clock Logic
     setInterval(() => {
         const now = new Date();
+
+        // Combined DateTime (legacy/other pages)
         const dtEl = document.getElementById('current-datetime');
         if (dtEl) {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' };
             dtEl.textContent = now.toLocaleDateString('en-US', options).replace(' at ', ' | ');
         }
+
+        // Split Date and Time (Dashboard)
+        const dateEl = document.getElementById('current-date');
+        const timeEl = document.getElementById('current-time');
+
+        if (dateEl) {
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateEl.textContent = now.toLocaleDateString('en-US', dateOptions);
+        }
+
+        if (timeEl) {
+            timeEl.textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+        }
     }, 1000);
 
-    // Initial Route Check
-    const path = window.location.pathname;
-    if (path.includes('dashboard') || path.endsWith('/')) {
-        // If index/landing, we usually don't force login unless it's dashboard
-        if (path.includes('dashboard')) {
-            checkAuth().then(auth => {
-                if (auth) loadDashboardData();
-                else window.location.href = 'login.html';
-            });
-        }
+    // Initial load checks
+    if (window.location.pathname.includes('dashboard') || window.location.pathname === '/') {
+        // No auth check needed, just load
+        loadDashboardData();
     }
 });
 
@@ -251,9 +204,7 @@ if (taskForm) {
     taskForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const user = Storage.getCurrentUser();
-        if (!user) return;
-
+        // No user check needed for static/open mode
         const id = document.getElementById('task-id').value; // String if present
 
         // Gather Data
@@ -279,7 +230,7 @@ if (taskForm) {
 
         const taskData = {
             id: id ? parseInt(id) : Date.now(),
-            user_id: user.id,
+            user_id: 1, // Default ID
             date: new Date().toISOString().split('T')[0], // Always save to today for now
             name: document.getElementById('m-task-name').value,
             start_time: startTime,
@@ -425,7 +376,7 @@ function openByModal(taskId = null) {
             document.getElementById('m-task-desc').value = task.description || '';
 
             // Radio
-            const rad = document.querySelector(`input[name="category"][value="${task.label}"]`);
+            const rad = document.querySelector(`input[name = "category"][value = "${task.label}"]`);
             if (rad) rad.checked = true;
             // Also select fallback
             const sel = document.getElementById('m-task-label');
@@ -485,10 +436,8 @@ window.AnalyticsAPI = {
         // Calculate based on range. For static demo, we might just do "Lifetime" or "Today".
         // Let's implement basic filtering.
         const tasks = Storage.getTasks();
-        const user = Storage.getCurrentUser();
-        if (!user) return {}; // handle error
-
-        const userTasks = tasks.filter(t => t.user_id === user.id);
+        // Assume all tasks are valid for current user
+        const userTasks = tasks;
 
         // Filter by date range (simple logic)
         let filtered = userTasks;
@@ -509,12 +458,33 @@ window.AnalyticsAPI = {
             return d >= cutoff;
         });
 
-        const { invested, wasted } = getFinancials(filtered);
+        // For filtered range (e.g. 7d), getFinancials needs to sum up day-by-day to be accurate about "untracked" for past days
+        // Simplified: Loop days
+        let invested = 0;
+        let wasted = 0;
+
+        // Group by date
+        const byDate = {};
+        filtered.forEach(t => {
+            if (!byDate[t.date]) byDate[t.date] = [];
+            byDate[t.date].push(t);
+        });
+
+        // Iterate dates in range? 
+        // If range is 7d, we should iterate last 7 days.
+        // This is complex for a simple static demo. 
+        // Fallback: Just calculate statics on found tasks + assume untracked for found days? 
+        // Let's iterate the keys we have as a robust enough approx.
+        Object.keys(byDate).forEach(date => {
+            const stats = getFinancials(byDate[date], date); // Pass date to trigger full day calc
+            invested += stats.invested;
+            wasted += stats.wasted;
+        });
 
         // Today specifics
         const todayStr = now.toISOString().split('T')[0];
         const todayTasks = userTasks.filter(t => t.date === todayStr);
-        const todayStats = getFinancials(todayTasks);
+        const todayStats = getFinancials(todayTasks, todayStr);
 
         return {
             total_invested: invested,
@@ -534,7 +504,6 @@ window.AnalyticsAPI = {
 
     // Helper to expose raw data for charts
     getData: (range) => {
-        // Re-use logic or just return raw tasks for chart.js processing in analytics.html
-        return Storage.getTasks().filter(t => t.user_id === Storage.getCurrentUser()?.id);
+        return Storage.getTasks(); // Return all tasks
     }
 };

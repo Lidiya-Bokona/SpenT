@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar - SpenT</title>
+  <link rel="icon" type="image/png" href="static/img/logo.jpg">
+  <link rel="stylesheet" href="static/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <nav class="navbar glass">
+    <div class="logo">
+      <a href="index.html"
+        style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
+        <div class="hero-logo-animated nav-logo" style="margin:0; width:40px; height:40px;">
+          <div class="analog-clock" style="width:40px; height:40px; border-width:1px;">
+            <div class="dollar-sign" style="font-size:1rem;">$</div>
+            <div class="hand hour-hand" style="height:10px;"></div>
+            <div class="hand minute-hand" style="height:15px;"></div>
+          </div>
+        </div>
+        SpenT
+      </a>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="calendar.html" class="active">Calendar</a>
+      <a href="analytics.html">Analytics</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h2 style="color:var(--accent-gold); margin-bottom:2rem;">Your Investment History</h2>
+
+    <div class="glass-card" style="padding:2rem;">
+      <!-- Placeholder for Calendar Functionality -->
+      <p style="color:var(--text-secondary); text-align:center;">Calendar View helps you see your daily "Investment" vs
+        "Waste" at a glance.</p>
+
+      <div
+        style="margin-top:2rem; display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:1rem;"
+        id="calendar-grid">
+        <!-- JS will populate past days -->
+      </div>
+    </div>
+  </div>
+
+  <script src="static/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const grid = document.getElementById('calendar-grid');
+      const tasks = Storage.getTasks();
+
+      // Group by date
+      const byDate = {};
+      tasks.forEach(t => {
+        if (!byDate[t.date]) byDate[t.date] = [];
+        byDate[t.date].push(t);
+      });
+
+      // Get last 30 days including today?
+      const today = new Date();
+      for (let i = 0; i < 30; i++) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+
+        const dayTasks = byDate[dateStr] || [];
+        const stats = getFinancials(dayTasks, dateStr); // Use correct 'untracked' logic for that day
+
+        // Render Card
+        const card = document.createElement('div');
+        card.className = 'glass-card';
+        card.style.padding = '1rem';
+        card.style.textAlign = 'center';
+        card.style.border = stats.wasted > stats.invested ? '1px solid #ff4d4d' : '1px solid #4caf50';
+
+        card.innerHTML = `
+                    <div style="font-weight:bold; margin-bottom:0.5rem; color:#fff;">${dateStr}</div>
+                    <div style="color:var(--accent-green); font-size:0.9rem;">Inv: $${stats.invested.toLocaleString()}</div>
+                    <div style="color:#ff4d4d; font-size:0.9rem;">Wst: $${stats.wasted.toLocaleString()}</div>
+                 `;
+
+        grid.appendChild(card);
+      }
+    });
+  </script>
+</body>
+
+</html>
