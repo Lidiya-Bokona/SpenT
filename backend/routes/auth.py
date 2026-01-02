@@ -1,10 +1,15 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from backend.extensions import db
+from backend.extensions import db, login_manager
 from backend.models import User
 
 auth_bp = Blueprint('auth', __name__)
+
+# 🔑 User loader for Flask-Login
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 @auth_bp.route('/')
 def index():
