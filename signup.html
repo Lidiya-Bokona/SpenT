@@ -20,7 +20,7 @@
 
     <div class="container center-content">
         <div class="auth-container glass-card">
-            <h2>Sign Up</h2>
+            <h2>Create Account</h2>
             <form id="signup-form">
                 <div class="form-group">
                     <label for="username">Username</label>
@@ -33,11 +33,20 @@
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" required>
+                    <div id="password-requirements" class="password-requirements">
+                        <p id="req-length" class="req-item">At least 8 characters</p>
+                        <p id="req-mix" class="req-item">Letter, number, and symbol</p>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary full-width">Create Account</button>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+                <div id="error-message" class="error-message hidden"></div>
+
+                <button type="submit" class="btn btn-primary full-width">Sign Up</button>
             </form>
             <p class="auth-footer">Already have an account? <a href="login.html">Login</a></p>
-            <div id="error-message" class="error-message hidden"></div>
         </div>
     </div>
 
