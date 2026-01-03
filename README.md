@@ -1,7 +1,5 @@
 # SpenT - Spend Your Time Wisely
 
-![SpenT Logo](static/img/logo.jpg)
-
 > **SpenT** represents the philosophy that "Time is Money." It is a powerful, static web application designed to help you track, manage, and optimize your daily time allocation effectively.
 
 ---
@@ -10,13 +8,13 @@
 
 **SpenT** transforms the abstract concept of time into a tangible asset. By initializing everyday with a "balance" of 86,400 seconds (representing the seconds in a 24-hour day), users can actively "spend" or "invest" their time.
 
-The application operates entirely client-side, using **LocalStorage** to persist your data, ensuring your privacy and allowing for a seamless offline experience.
+The application operates entirely client side, using **LocalStorage** to persist your data, ensuring your privacy and allowing for a seamless offline experience.
 
 ## ✨ Features
 
 -   **Dashboard**: A central hub displaying your live "Remaining Balance," "Invested Time," and "Wasted Time."
 -   **Smart Task Tracking**: Log tasks as "Good" (Invested), "Neutral," or "Bad" (Wasted/Expenses).
--   **Live Analytics**: Visualize your time distribution with dynamic charts and real-time statistics.
+-   **Live Analytics**: Visualize your time distribution with dynamic charts and real time statistics.
 -   **Calendar View**: Review your history and track consistency over time.
 -   **PDF Reporting**: generated detailed reports of your time usage for accountability.
 -   **Privacy Focused**: All data is stored locally on your device. No external servers tracks your movements.
@@ -26,7 +24,7 @@ The application operates entirely client-side, using **LocalStorage** to persist
 This project is built with a modern, lightweight stack to ensure speed and reliability:
 
 -   **HTML5**: Semantic structure and accessible markup.
--   **CSS3**: Custom styling with a premium, dark-themed aesthetic.
+-   **CSS3**: Custom styling with a premium, dark themed aesthetic.
 -   **JavaScript (ES6+)**: Dynamic logic for real-time counters, local storage management, and data visualization.
 -   **Chart.js**: Interactive graphs for the analytics dashboard.
 -   **Kendo UI / html2pdf**: Tools for generating professional PDF reports.
@@ -37,7 +35,7 @@ Since SpenT is a static web application, no complex backend installation is requ
 
 1.  **Clone the Repository**
     ```bash
-    git clone https://github.com/yourusername/spent.git
+    git clone https://github.com/Lidiya-Bokona/spent.git
     ```
 
 2.  **Navigate to the Directory**
