@@ -2,6 +2,7 @@
 
 > **SpenT** represents the philosophy that "Time is Money." It is a powerful, static web application designed to help you track, manage, and optimize your daily time allocation effectively.
 
+Website: https://spen-t.netlify.app/
 ---
 
 ## 📖 Overview
@@ -35,12 +36,12 @@ Since SpenT is a static web application, no complex backend installation is requ
 
 1.  **Clone the Repository**
     ```bash
-    git clone https://github.com/Lidiya-Bokona/spent.git
+    git clone https://github.com/Lidiya-Bokona/SpenT.git
     ```
-
+    
 2.  **Navigate to the Directory**
     ```bash
-    cd spent
+    cd SpenT
     ```
 
 3.  **Launch the App**
