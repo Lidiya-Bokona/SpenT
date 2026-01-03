@@ -4,26 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpenT - Spend Your Time Like Money</title>
+    <title>SpenT - Invest Your Time</title>
     <link rel="icon" type="image/png" href="static/img/logo.jpg">
     <link rel="stylesheet" href="static/css/style.css">
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-bg: #0a0a0a;
-            --secondary-bg: #141414;
+            --primary-bg: #050505;
+            --secondary-bg: #0a0a0a;
             --accent-gold: #D4AF37;
+            --accent-gold-glow: rgba(212, 175, 55, 0.4);
             --text-primary: #ffffff;
             --text-secondary: #a0a0a0;
-            --card-glass: rgba(255, 255, 255, 0.03);
-            --card-border: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.08);
         }
 
         body {
             background-color: var(--primary-bg);
             color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
             overflow-x: hidden;
         }
 
@@ -31,371 +32,127 @@
         .landing-nav {
             position: fixed;
             top: 0;
-            left: 0;
             width: 100%;
-            padding: 0.8rem 2rem;
+            padding: 1rem 3rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 1000;
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--card-border);
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
         }
 
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--text-primary);
-            text-decoration: none;
-        }
 
-        .nav-logo i {
-            color: var(--accent-gold);
-        }
 
-        .nav-links {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .nav-link {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.3s;
-            font-size: 0.95rem;
-        }
-
-        .nav-link:hover {
-            color: var(--text-primary);
-        }
-
-        .btn-nav-primary {
-            background: var(--accent-gold);
-            color: #000;
-            padding: 0.6rem 1.2rem;
-            border-radius: 6px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-nav-primary:hover {
-            color: var(--accent-gold);
-            background: #000;
-            border: 1px solid var(--accent-gold);
-            transform: translateY(-1px);
-        }
-
-        @media (max-width: 480px) {
-            .landing-nav {
-                padding: 0.8rem 1rem;
-            }
-
-            .nav-links {
-                gap: 0.8rem;
-            }
-
-            .btn-nav-primary {
-                padding: 0.5rem 0.8rem;
-                font-size: 0.8rem;
-                white-space: nowrap;
-            }
-
-            .nav-logo {
-                font-size: 1.2rem;
-                gap: 0.5rem;
-                height: 40px;
-            }
-        }
-
-        /* --- Navbar Logo Mini --- */
-        @keyframes spin {
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .hero-logo-animated {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-        }
-
-        .hero-logo-animated .analog-clock {
-            width: 80px;
-            height: 80px;
-            border: 2px solid var(--accent-gold);
-            border-radius: 50%;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .hero-logo-animated .dollar-sign {
-            font-size: 2rem;
-            color: var(--accent-gold);
-            font-weight: bold;
-        }
-
-        .hero-logo-animated .hand {
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            background: var(--accent-gold);
-            transform-origin: bottom center;
-            border-radius: 2px;
-        }
-
-        .hero-logo-animated .hour-hand {
-            width: 2px;
-            height: 20px;
-            transform: rotate(90deg);
-            animation: spin 12s linear infinite;
-        }
-
-        .hero-logo-animated .minute-hand {
-            width: 1px;
-            height: 30px;
-            transform: rotate(180deg);
-            animation: spin 2s linear infinite;
-            /* Fast spin for effect */
-            opacity: 0.7;
-        }
-
-        /* --- Hero Section --- */
-        .landing-hero {
+        /* --- Hero --- */
+        .hero {
             position: relative;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
             text-align: center;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
             overflow: hidden;
-            background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 70%);
+            padding: 2rem;
         }
 
-        .hero-bg-glow {
+        .hero::before {
+            content: '';
             position: absolute;
             top: 50%;
             left: 50%;
+            transform: translate(-50%, -50%);
             width: 60vw;
             height: 60vw;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(80px);
             z-index: 1;
-            pointer-events: none;
         }
 
         .hero-content {
             position: relative;
             z-index: 2;
             max-width: 900px;
-            animation: fadeIn Up 1s ease-out;
-        }
-
-        /* Logo Animation */
-        .hero-logo-container {
-            margin-bottom: 2rem;
-            position: relative;
-            display: inline-block;
-        }
-
-        .analog-clock-logo {
-            width: 140px;
-            height: 140px;
-            border: 3px solid var(--accent-gold);
-            border-radius: 50%;
-            position: relative;
-            margin: 0 auto;
-            background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
-        }
-
-        .clock-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 3.5rem;
-            color: var(--accent-gold);
-            font-weight: 300;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .clock-hand {
-            background: var(--accent-gold);
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom center;
-            border-radius: 4px;
-        }
-
-        .hand-hour {
-            width: 4px;
-            height: 35px;
-            animation: rotate 12s linear infinite;
-        }
-
-        .hand-minute {
-            width: 2px;
-            height: 55px;
-            animation: rotate 2s linear infinite;
-        }
-
-        @keyframes rotate {
-            from {
-                transform: translateX(-50%) rotate(0deg);
-            }
-
-            to {
-                transform: translateX(-50%) rotate(360deg);
-            }
+            animation: fadeIn 1.2s ease-out;
         }
 
         h1 {
-            font-size: clamp(3rem, 6vw, 5.5rem);
+            font-size: clamp(3.5rem, 8vw, 6rem);
             line-height: 1;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #fff 20%, #888 100%);
+            background: linear-gradient(180deg, #fff 0%, #888 100%);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -2px;
         }
 
-        .tagline {
-            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+        p.tagline {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
             color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 4px;
             margin-bottom: 2rem;
-            font-weight: 300;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            font-weight: 400;
         }
 
-        .description {
-            font-size: 1.2rem;
+        p.description {
+            font-size: 1.15rem;
+            line-height: 1.8;
             color: var(--text-secondary);
-            margin: 0 auto 3.5rem;
-            line-height: 1.7;
-            max-width: 650px;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .description strong {
-            color: #fff;
-            font-weight: 600;
-        }
-
-        .cta-group {
-            display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn-large {
-            padding: 1rem 3rem;
-            font-size: 1.1rem;
-            border-radius: 50px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-gold {
+        .cta-btn {
+            display: inline-block;
             background: var(--accent-gold);
             color: #000;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            font-weight: 700;
+            padding: 1.2rem 3.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 25px var(--accent-gold-glow);
+            font-size: 1rem;
         }
 
-        .btn-gold:hover {
-            background: #e6c257;
-            box-shadow: 0 0 35px rgba(212, 175, 55, 0.5);
-            transform: translateY(-3px);
+        .cta-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 40px var(--accent-gold-glow);
+            background: #fff;
         }
 
-        .btn-outline {
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-            background: transparent;
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .btn-outline:hover {
-            background: rgba(212, 175, 55, 0.1);
-        }
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .landing-nav {
+                padding: 1rem;
+            }
 
-        /* --- Features Section --- */
-        .features {
-            padding: 6rem 2rem;
-            background: var(--secondary-bg);
-            border-top: 1px solid var(--card-border);
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 4rem;
-            color: var(--text-primary);
-        }
-
-        .section-title span {
-            color: var(--accent-gold);
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .feature-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--card-border);
-            padding: 2.5rem;
-            border-radius: 12px;
-            text-align: left;
-            transition: transform 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(212, 175, 55, 0.3);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            color: var(--accent-gold);
-            margin-bottom: 1.5rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
-
-        /* --- Footer --- */
-        footer {
-            padding: 2rem;
-            text-align: center;
-            border-top: 1px solid var(--card-border);
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+            h1 {
+                margin-bottom: 1rem;
+            }
         }
     </style>
 </head>
@@ -403,74 +160,31 @@
 <body>
 
     <nav class="landing-nav">
-        <a href="#" class="nav-logo hero-logo-animated nav-logo">
-            <div class="analog-clock">
-                <div class="dollar-sign">$</div>
-                <div class="hand hour-hand"></div>
-                <div class="hand minute-hand"></div>
+        <a href="#" class="logo">
+            <div class="hero-logo-animated nav-logo">
+                <div class="analog-clock">
+                    <div class="dollar-sign">$</div>
+                    <div class="hand hour-hand"></div>
+                    <div class="hand minute-hand"></div>
+                </div>
             </div>
             SpenT
         </a>
-        <div class="nav-links">
-            <a href="dashboard.html" class="btn-nav-primary">Open Dashboard</a>
-        </div>
+        <!-- Buttons removed as per request -->
     </nav>
 
-    <section class="landing-hero">
-        <div class="hero-bg-glow"></div>
+    <section class="hero">
         <div class="hero-content">
-            <div class="hero-logo-container">
-                <div class="hero-logo-animated" style="margin: 0 auto;">
-                    <div class="analog-clock">
-                        <div class="dollar-sign">$</div>
-                        <div class="hand hour-hand"></div>
-                        <div class="hand minute-hand"></div>
-                    </div>
-                </div>
-            </div>
-
-            <h1>SpenT</h1>
-            <p class="tagline">Time Is Money. Invest It Wisely.</p>
-
+            <p class="tagline">Time is Money</p>
+            <h1>Invest It Wisely</h1>
             <p class="description">
-                You receive <strong>$86,400</strong> worth of seconds every single day.
-                Do you simply let it slip away, or do you invest it to build your future?
-                Track, analyze, and optimize your most valuable asset.
+                You are given <strong style="color:#fff;">86,400 seconds</strong> every day.
+                Are you investing them to build your future, or letting them slip away?
+                Track your time like currency with the ultimate asset management tool.
             </p>
-
-            <div class="cta-group">
-                <a href="dashboard.html" class="btn-large btn-gold">Start Dashboard</a>
-            </div>
+            <a href="dashboard.html" class="cta-btn">Start Investing</a>
         </div>
     </section>
-
-    <section class="features">
-        <h2 class="section-title">Why <span>SpenT</span>?</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                <h3>Track Every Second</h3>
-                <p style="color:var(--text-secondary);">Log your daily activities as financial transactions. See exactly
-                    where your time wealth goes each day.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-balance-scale"></i></div>
-                <h3>Invest vs. Waste</h3>
-                <p style="color:var(--text-secondary);">Categorize time as "Investment" (growth) or "Expense" (waste).
-                    Visualize your ROI with intuitive dashboards.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-history"></i></div>
-                <h3>Build Better Habits</h3>
-                <p style="color:var(--text-secondary);">Analyze trends over time. Identify time leaks and optimize your
-                    schedule for maximum productivity.</p>
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <p>&copy; 2025 SpenT. All rights reserved. Time is Currency.</p>
-    </footer>
 
 </body>
 

@@ -1,147 +1,195 @@
-// --- Constants & Config ---
-const STORAGE_KEYS = {
-    // USERS key no longer needed really, but we'll keep for legacy struct if we want
-    TASKS: 'spent_tasks'
-};
+const STORAGE_KEY = 'spent_tasks';
 
-// --- Storage Manager ---
-const Storage = {
-    // Simplified: No user list needed, just "Default User" context
-    getTasks: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.TASKS) || '[]'),
-    setTasks: (tasks) => localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks))
-};
+// --- Data Management (LocalStorage) ---
 
-// --- Auth Functions (Stubbed for No-Auth) ---
-async function checkAuth() {
-    return true; // Always authenticated
+function getTasks() {
+    const tasks = localStorage.getItem(STORAGE_KEY);
+    return tasks ? JSON.parse(tasks) : [];
 }
 
-// Ensure a "session" exists implicitly
-const DEFAULT_USER_ID = 1;
+function saveTasks(tasks) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
 
-// --- Data Logic (The "Backend") ---
+function addTask(task) {
+    const tasks = getTasks();
+    tasks.push(task);
+    saveTasks(tasks);
+}
 
-function getFinancials(tasks = [], dateStr = null) {
-    let invested = 0;
-    let explicitWasted = 0;
-    let totalLogged = 0;
+function updateTask(updatedTask) {
+    let tasks = getTasks();
+    const index = tasks.findIndex(t => t.id === updatedTask.id);
+    if (index !== -1) {
+        tasks[index] = updatedTask;
+        saveTasks(tasks);
+    }
+}
 
-    tasks.forEach(t => {
-        const duration = getDurationSeconds(t.start_time, t.end_time);
-        totalLogged += duration;
-        if (t.label === 'Good' || t.label === 'Neutral') {
-            invested += duration;
-        } else {
-            explicitWasted += duration;
+function removeTask(id) {
+    let tasks = getTasks();
+    tasks = tasks.filter(t => t.id !== id);
+    saveTasks(tasks);
+}
+
+// --- Time & Financial Logic ---
+
+function getSecondsSinceMidnight() {
+    const now = new Date();
+    return (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
+}
+
+function timeStringToSeconds(timeStr) {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return (hours * 3600) + (minutes * 60);
+}
+
+function secondsToTimeString(seconds) {
+    const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    return `${h}:${m}`;
+}
+
+function formatDuration(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return `${h}h ${m}m`;
+}
+
+function getLocalDateString() {
+    const now = new Date();
+    // Returns YYYY-MM-DD in local time
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function calculateDailyStats() {
+    const nowSeconds = getSecondsSinceMidnight();
+    const tasks = getTasks();
+    const today = getLocalDateString();
+
+    // Filter tasks for today
+    const todaysTasks = tasks.filter(t => t.date === today);
+
+    // Collect intervals for Good/Neutral tasks
+    const investments = [];
+
+    todaysTasks.forEach(task => {
+        if (task.label === 'Good' || task.label === 'Neutral') {
+            investments.push({
+                start: timeStringToSeconds(task.start_time),
+                end: timeStringToSeconds(task.end_time)
+            });
         }
     });
 
-    // Calculate Untracked based on "Time Passed"
-    // If date is today, time passed = now. If past date, time passed = 86400.
-    let secondsPassed = 86400; // Default to full day (past)
+    // Merge intervals to avoid double-counting time
+    investments.sort((a, b) => a.start - b.start);
 
-    if (dateStr) {
-        const todayStr = new Date().toISOString().split('T')[0];
-        if (dateStr === todayStr) {
-            const now = new Date();
-            secondsPassed = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    const mergedInvestments = [];
+    if (investments.length > 0) {
+        let current = investments[0];
+
+        for (let i = 1; i < investments.length; i++) {
+            const next = investments[i];
+            if (current.end >= next.start) {
+                // Overlap, merge
+                current.end = Math.max(current.end, next.end);
+            } else {
+                // No overlap, push current and move to next
+                mergedInvestments.push(current);
+                current = next;
+            }
         }
+        mergedInvestments.push(current);
     }
 
-    // Ensure we don't have negative untracked (e.g. overlapping tasks logging > time passed)
-    let untracked = Math.max(0, secondsPassed - totalLogged);
+    // Calculate Total Invested (Static - Time Covered) and Invested So Far (Live)
+    let totalInvestedStatic = 0;
+    let investedSoFar = 0;
 
-    // "Automatically wasted" = Untracked + Explicit Bad
-    let totalWasted = explicitWasted + untracked;
+    mergedInvestments.forEach(inv => {
+        // Static total duration
+        totalInvestedStatic += (inv.end - inv.start);
 
-    return { invested, wasted: totalWasted, untracked, explicitWasted };
-}
-
-function getDurationSeconds(start, end) {
-    const [h1, m1] = start.split(':').map(Number);
-    const [h2, m2] = end.split(':').map(Number);
-    const d1 = new Date(0, 0, 0, h1, m1);
-    const d2 = new Date(0, 0, 0, h2, m2);
-    let diff = (d2 - d1) / 1000;
-    if (diff < 0) diff += 86400; // crossover midnight? Assuming simple day for now
-    return diff;
-}
-
-// --- Dashboard Functions ---
-
-let allTasks = []; // Store locally for editing
-
-async function loadDashboardData() {
-    // Filter tasks for TODAY
-    const rawTasks = Storage.getTasks();
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    // We treat all tasks as belonging to the default user now
-    // If migration from old version: we might ignore user_id or just show all.
-    // For safety, let's just show all tasks that match today's date.
-
-    allTasks = rawTasks.filter(t => t.date === todayStr);
-
-    // Calculate Stats
-    // Pass today's date to handle "Untracked time" logic relative to NOW
-    const { invested, wasted } = getFinancials(allTasks, todayStr);
-
-    // Calculate Remaining (Time Left in the Day)
-    const now = new Date();
-    const secondsPassed = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-    const secondsInDay = 86400;
-    const remaining = secondsInDay - secondsPassed;
-
-    // Update UI
-    startCountdown(remaining);
-
-    const invEl = document.getElementById('invested-today');
-    const wasEl = document.getElementById('wasted-today');
-
-    if (invEl) invEl.textContent = invested.toLocaleString();
-    if (wasEl) wasEl.textContent = wasted.toLocaleString();
-
-    renderTasks(allTasks);
-}
-
-function startCountdown(initialSeconds) {
-    // Sync with real time to be accurate
-    const counter = document.getElementById('money-counter');
-    if (window.countdownInterval) clearInterval(window.countdownInterval);
-
-    function update() {
-        const now = new Date();
-        const secondsPassed = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-        const remaining = 86400 - secondsPassed;
-
-        if (remaining >= 0) {
-            counter.textContent = remaining.toLocaleString();
-        } else {
-            counter.textContent = "0";
+        // Live invested (intersection with [0, nowSeconds])
+        if (nowSeconds > inv.start) {
+            const effectiveEnd = Math.min(inv.end, nowSeconds);
+            investedSoFar += (effectiveEnd - inv.start);
         }
-    }
+    });
 
-    update();
-    window.countdownInterval = setInterval(update, 1000);
+    // 3. Wasted (Live)
+    // Time passed so far - Time spent productively/neutrally so far (merged)
+    let totalWastedLive = nowSeconds - investedSoFar;
+    if (totalWastedLive < 0) totalWastedLive = 0;
+
+    // 4. Remaining (Live)
+    const remainingLive = 86400 - nowSeconds;
+
+    return {
+        invested: totalInvestedStatic,
+        wasted: totalWastedLive,
+        remaining: remainingLive,
+        tasks: todaysTasks
+    };
 }
 
-function renderTasks(tasks) {
+// --- Dashboard UI Updates ---
+
+
+function updateDashboard() {
+    // Check if we are on the dashboard (look for the main new counter ID)
+    const mainCounterDisplay = document.getElementById('main-counter-display');
+    if (!mainCounterDisplay) return;
+
+    const stats = calculateDailyStats();
+
+    // Update MAIN Counter (Remaining Balance - Count Down)
+    mainCounterDisplay.textContent = stats.remaining.toLocaleString();
+
+    // Update Secondary Metrics
+    // Card 1: Invested (Static Sum)
+    const investedEl = document.getElementById('invested-today');
+    const investedDurEl = document.getElementById('invested-duration');
+
+    if (investedEl) investedEl.textContent = stats.invested.toLocaleString();
+    if (investedDurEl) investedDurEl.textContent = formatDuration(stats.invested);
+
+    // Card 2: Wasted (Live Count Up)
+    const wastedEl = document.getElementById('wasted-time-small');
+    const wastedDurEl = document.getElementById('wasted-duration');
+
+    if (wastedEl) wastedEl.textContent = stats.wasted.toLocaleString();
+    if (wastedDurEl) wastedDurEl.textContent = formatDuration(stats.wasted);
+}
+
+function renderTaskList() {
     const list = document.getElementById('task-list');
+    if (!list) return;
+
+    const tasks = getTasks();
+    const today = getLocalDateString();
+    const todaysTasks = tasks.filter(t => t.date === today).sort((a, b) => a.start_time.localeCompare(b.start_time));
+
     list.innerHTML = '';
 
-    if (tasks.length === 0) {
-        list.innerHTML = '<p style="text-align:center; color:var(--text-secondary);">No tasks logged today.</p>';
+    if (todaysTasks.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:var(--text-secondary); margin-top:2rem;">No transactions today. Time is slipping away...</p>';
         return;
     }
 
-    // Sort by start time
-    tasks.sort((a, b) => a.start_time.localeCompare(b.start_time));
-
-    tasks.forEach(task => {
-        const cost = getDurationSeconds(task.start_time, task.end_time);
-
+    todaysTasks.forEach(task => {
         const div = document.createElement('div');
         div.className = `task-card ${task.label.toLowerCase()}`;
+
+        // Calculate Cost/Value (Planned)
+        const s = timeStringToSeconds(task.start_time);
+        const e = timeStringToSeconds(task.end_time);
+        const val = e - s;
+
         div.innerHTML = `
             <div class="task-info">
                 <h4>${task.name} <small style="color:var(--text-secondary); font-weight:normal;">(${task.start_time} - ${task.end_time})</small></h4>
@@ -151,359 +199,192 @@ function renderTasks(tasks) {
                 </div>
             </div>
             
-            <div class="task-price-tag">$${cost.toLocaleString()}</div>
+            <div class="task-price-tag">$${val.toLocaleString()}</div>
             
             <div class="actions">
-                <button onclick="openByModal(${task.id})" class="btn-sm-icon" title="Edit">✎</button>
-                <button onclick="deleteTask(${task.id})" class="btn-sm-icon delete" title="Delete">🗑</button>
+                <button onclick="openByModal('${task.id}')" class="btn-sm-icon" title="Edit">✎</button>
+                <button onclick="deleteTask('${task.id}')" class="btn-sm-icon delete" title="Delete">🗑</button>
             </div>
         `;
         list.appendChild(div);
     });
 }
 
+
 // --- Modal & Form Logic ---
 
-document.addEventListener('DOMContentLoaded', () => {
-    // ... (Clock setup exists in old code, preserving)
-    // Clock Logic
-    setInterval(() => {
-        const now = new Date();
-
-        // Combined DateTime (legacy/other pages)
-        const dtEl = document.getElementById('current-datetime');
-        if (dtEl) {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' };
-            dtEl.textContent = now.toLocaleDateString('en-US', options).replace(' at ', ' | ');
-        }
-
-        // Split Date and Time (Dashboard)
-        const dateEl = document.getElementById('current-date');
-        const timeEl = document.getElementById('current-time');
-
-        if (dateEl) {
-            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            dateEl.textContent = now.toLocaleDateString('en-US', dateOptions);
-        }
-
-        if (timeEl) {
-            timeEl.textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
-        }
-    }, 1000);
-
-    // Initial load checks
-    if (window.location.pathname.includes('dashboard') || window.location.pathname === '/') {
-        // No auth check needed, just load
-        loadDashboardData();
-    }
-});
-
-// Submit Task
-const taskForm = document.getElementById('modal-task-form');
-if (taskForm) {
-    taskForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        // No user check needed for static/open mode
-        const id = document.getElementById('task-id').value; // String if present
-
-        // Gather Data
-        const isRoutine = document.getElementById('m-is-routine').checked;
-        const recurrenceType = document.getElementById('m-recurrence-type').value;
-        let repeatDays = null;
-
-        if (isRoutine && recurrenceType === 'Custom') {
-            const checked = Array.from(document.querySelectorAll('.day-btn.active')).map(btn => btn.dataset.day);
-            repeatDays = checked.join(',');
-        }
-
-        const selectedRadio = document.querySelector('input[name="category"]:checked');
-        const label = selectedRadio ? selectedRadio.value : (document.getElementById('m-task-label')?.value || 'Good');
-
-        const startTime = document.getElementById('m-task-start').value;
-        const endTime = document.getElementById('m-task-end').value;
-
-        if (startTime >= endTime) {
-            alert("End time must be after start time.");
-            return;
-        }
-
-        const taskData = {
-            id: id ? parseInt(id) : Date.now(),
-            user_id: 1, // Default ID
-            date: new Date().toISOString().split('T')[0], // Always save to today for now
-            name: document.getElementById('m-task-name').value,
-            start_time: startTime,
-            end_time: endTime,
-            label: label,
-            description: document.getElementById('m-task-desc').value,
-            is_routine: isRoutine,
-            recurrence_type: isRoutine ? recurrenceType : 'Daily',
-            repeat_days: repeatDays
-        };
-
-        const tasks = Storage.getTasks();
-
-        if (id) {
-            // Edit
-            const idx = tasks.findIndex(t => t.id == id);
-            if (idx > -1) {
-                tasks[idx] = { ...tasks[idx], ...taskData };
-            }
-        } else {
-            // Add
-            tasks.push(taskData);
-        }
-
-        Storage.setTasks(tasks);
-        closeModal();
-        loadDashboardData();
-    });
-}
-
-// Delete Task
-async function deleteTask(id) {
-    if (!confirm("Delete this task?")) return;
-
-    let tasks = Storage.getTasks();
-    tasks = tasks.filter(t => t.id !== id);
-    Storage.setTasks(tasks);
-
-    loadDashboardData();
-}
-
-// --- Auth Form Listeners (Login/Signup) ---
-// These need to be attached if the elements exist (e.g. on login.html)
-
-const loginForm = document.getElementById('login-form');
-if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const res = await login(email, password);
-
-        if (res.success) window.location.href = 'dashboard.html';
-        else {
-            const err = document.getElementById('error-message');
-            err.textContent = res.message;
-            err.classList.remove('hidden');
-        }
-    });
-}
-
-const signupForm = document.getElementById('signup-form');
-if (signupForm) {
-    signupForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username')?.value || 'User';
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const confirm = document.getElementById('confirm_password').value;
-        const errorDiv = document.getElementById('error-message');
-
-        if (password !== confirm) {
-            errorDiv.textContent = "Passwords do not match.";
-            errorDiv.classList.remove('hidden');
-            return;
-        }
-
-        const res = await signup(username, email, password);
-        if (res.success) {
-            window.location.href = 'login.html'; // Redirect to login
-        } else {
-            errorDiv.textContent = res.message;
-            errorDiv.classList.remove('hidden');
-        }
-    });
-
-    // Password validation listeners (keep existing UI logic)
-    const passInput = document.getElementById('password');
-    const reqLen = document.getElementById('req-length');
-    const reqMix = document.getElementById('req-mix');
-    const reqList = document.getElementById('password-requirements');
-
-    if (passInput && reqList) {
-        passInput.addEventListener('focus', () => reqList.style.display = 'block');
-        passInput.addEventListener('input', () => {
-            const val = passInput.value;
-            if (reqLen) {
-                if (val.length >= 8) reqLen.classList.add('valid');
-                else reqLen.classList.remove('valid');
-            }
-            if (reqMix) {
-                const hasLetter = /[a-zA-Z]/.test(val);
-                const hasNum = /[0-9]/.test(val);
-                const hasSym = /[^a-zA-Z0-9]/.test(val);
-                if (hasLetter && hasNum && hasSym) reqMix.classList.add('valid');
-                else reqMix.classList.remove('valid');
-            }
-        });
-    }
-}
-
-
-// --- Modal UI Helpers ---
 function openByModal(taskId = null) {
     const modal = document.getElementById('task-modal');
-    if (!modal) return;
+    const form = document.getElementById('modal-task-form');
+    const title = document.getElementById('modal-title');
 
-    // Reset basic fields
-    document.getElementById('modal-task-form').reset();
+    if (!modal || !form) return;
+
+    form.reset();
     document.getElementById('task-id').value = '';
-    document.getElementById('modal-title').textContent = 'New Transaction';
 
-    // Default time
-    const now = new Date();
-    document.getElementById('m-task-start').value = now.toTimeString().slice(0, 5);
+    // Reset UI
+    const routineOpts = document.getElementById('routine-options');
+    if (routineOpts) routineOpts.classList.add('hidden');
 
-    // Hide specialized sections
-    document.getElementById('routine-options').classList.add('hidden');
-    document.getElementById('custom-days-container').classList.add('hidden');
-    document.querySelectorAll('.recurrence-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('.recurrence-btn[data-value="Daily"]')?.classList.add('active');
-
-    if (taskId) {
-        // Find task
-        const tasks = allTasks; // from loaded scope
+    if (taskId && taskId !== 'undefined' && taskId !== 'null') {
+        // Edit Mode
+        const tasks = getTasks();
         const task = tasks.find(t => t.id === taskId);
         if (task) {
-            document.getElementById('modal-title').textContent = 'Edit Transaction';
+            title.textContent = 'Edit Transaction';
             document.getElementById('task-id').value = task.id;
             document.getElementById('m-task-name').value = task.name;
             document.getElementById('m-task-start').value = task.start_time;
             document.getElementById('m-task-end').value = task.end_time;
             document.getElementById('m-task-desc').value = task.description || '';
 
-            // Radio
-            const rad = document.querySelector(`input[name = "category"][value = "${task.label}"]`);
-            if (rad) rad.checked = true;
-            // Also select fallback
-            const sel = document.getElementById('m-task-label');
-            if (sel) sel.value = task.label;
+            // Category
+            const radio = document.querySelector(`input[name="category"][value="${task.label}"]`);
+            if (radio) radio.checked = true;
 
             if (task.is_routine) {
                 document.getElementById('m-is-routine').checked = true;
-                document.getElementById('routine-options').classList.remove('hidden');
-                setRecurrence(task.recurrence_type || 'Daily');
-
-                if (task.recurrence_type === 'Custom' && task.repeat_days) {
-                    const days = task.repeat_days.split(',');
-                    document.querySelectorAll('.day-btn').forEach(btn => {
-                        if (days.includes(btn.dataset.day)) btn.classList.add('active');
-                    });
-                }
+                if (routineOpts) routineOpts.classList.remove('hidden');
+                document.getElementById('m-recurrence-type').value = task.recurrence_type;
+                window.setRecurrence(task.recurrence_type);
             }
         }
+    } else {
+        // Add Mode
+        title.textContent = 'New Transaction';
+        const now = new Date();
+        const nowStr = now.toTimeString().slice(0, 5);
+        document.getElementById('m-task-start').value = nowStr;
+        // Default end time + 30 mins
+        const end = new Date(now.getTime() + 30 * 60000);
+        document.getElementById('m-task-end').value = end.toTimeString().slice(0, 5);
+
+        // Reset Recurrence UI
+        window.setRecurrence('Daily');
     }
 
     modal.classList.add('active');
 }
 
 function closeModal() {
-    document.getElementById('task-modal').classList.remove('active');
-}
-
-window.onclick = function (event) {
     const modal = document.getElementById('task-modal');
-    if (event.target == modal) closeModal();
+    if (modal) modal.classList.remove('active');
 }
 
-// Routine Toggles
-document.getElementById('m-is-routine')?.addEventListener('change', function () {
-    const opts = document.getElementById('routine-options');
-    if (this.checked) opts.classList.remove('hidden');
-    else opts.classList.add('hidden');
+function handleFormSubmit(e) {
+    e.preventDefault();
+
+    const id = document.getElementById('task-id').value;
+    const name = document.getElementById('m-task-name').value;
+    const start = document.getElementById('m-task-start').value;
+    const end = document.getElementById('m-task-end').value;
+    const desc = document.getElementById('m-task-desc').value;
+    const label = document.querySelector('input[name="category"]:checked').value;
+    const isRoutine = document.getElementById('m-is-routine').checked;
+    const recurrenceType = document.getElementById('m-recurrence-type').value;
+
+    if (start >= end) {
+        alert("End time must be after start time.");
+        return;
+    }
+
+    const newTask = {
+        id: id || Date.now().toString(),
+        name,
+        start_time: start,
+        end_time: end,
+        description: desc,
+        label,
+        is_routine: isRoutine,
+        recurrence_type: recurrenceType,
+        date: getLocalDateString()
+    };
+
+    if (id) {
+        updateTask(newTask);
+    } else {
+        addTask(newTask);
+    }
+
+    closeModal();
+    renderTaskList();
+    updateDashboard(); // Immediate update
+}
+
+function deleteTaskWrapper(id) {
+    if (confirm("Delete this transaction?")) {
+        removeTask(id);
+        renderTaskList();
+        updateDashboard();
+    }
+}
+
+
+// --- Initialization ---
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Core Clock Init
+    setInterval(() => {
+        // Update Time Display
+        const dtEl = document.getElementById('current-datetime');
+        if (dtEl) {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' };
+            dtEl.textContent = now.toLocaleDateString('en-US', options).replace(' at ', ' | ');
+        }
+
+        // Update Stats
+        updateDashboard();
+    }, 1000);
+
+    // Initial Renders
+    if (document.getElementById('task-list')) {
+        renderTaskList();
+        updateDashboard();
+    }
+
+    // Modal Events
+    const form = document.getElementById('modal-task-form');
+    if (form) form.addEventListener('submit', handleFormSubmit);
+
+    // Close Modal on Outside Click
+    window.onclick = function (event) {
+        const modal = document.getElementById('task-modal');
+        if (event.target == modal) closeModal();
+    }
+
+    // Recurrence logic UI
+    const routineCheck = document.getElementById('m-is-routine');
+    if (routineCheck) {
+        routineCheck.addEventListener('change', function () {
+            const opts = document.getElementById('routine-options');
+            if (this.checked) opts.classList.remove('hidden');
+            else opts.classList.add('hidden');
+        });
+    }
 });
 
-// UI Exports
+// Expose to window for HTML attributes
 window.openByModal = openByModal;
 window.closeModal = closeModal;
-window.deleteTask = deleteTask;
-window.toggleDay = function (el) { el.classList.toggle('active'); };
+window.deleteTask = deleteTaskWrapper;
+// Helper for recurrence UI which might be used in modal
 window.setRecurrence = function (val) {
     document.querySelectorAll('.recurrence-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.recurrence-btn[data-value="${val}"]`)?.classList.add('active');
-    document.getElementById('m-recurrence-type').value = val;
+    const btn = document.querySelector(`.recurrence-btn[data-value="${val}"]`);
+    if (btn) btn.classList.add('active');
+
+    const inp = document.getElementById('m-recurrence-type');
+    if (inp) inp.value = val;
+
     const custom = document.getElementById('custom-days-container');
-    if (val === 'Custom') custom.classList.remove('hidden');
-    else custom.classList.add('hidden');
-};
-
-// Analytics Data Provider (for analytics.html)
-window.AnalyticsAPI = {
-    getSummary: (range) => {
-        // Calculate based on range. For static demo, we might just do "Lifetime" or "Today".
-        // Let's implement basic filtering.
-        const tasks = Storage.getTasks();
-        // Assume all tasks are valid for current user
-        const userTasks = tasks;
-
-        // Filter by date range (simple logic)
-        let filtered = userTasks;
-        const now = new Date();
-        const cutoff = new Date();
-
-        if (range === '1d') cutoff.setDate(now.getDate()); // Today
-        else if (range === '7d') cutoff.setDate(now.getDate() - 7);
-        else if (range === '30d') cutoff.setDate(now.getDate() - 30);
-        else if (range === '365d') cutoff.setDate(now.getDate() - 365);
-
-        // Apply date filter
-        filtered = userTasks.filter(t => {
-            const d = new Date(t.date);
-            // 1d needs strict equality of YYYY-MM-DD? 
-            // If range is 1d, we want t.date == todayStr
-            if (range === '1d') return t.date === now.toISOString().split('T')[0];
-            return d >= cutoff;
-        });
-
-        // For filtered range (e.g. 7d), getFinancials needs to sum up day-by-day to be accurate about "untracked" for past days
-        // Simplified: Loop days
-        let invested = 0;
-        let wasted = 0;
-
-        // Group by date
-        const byDate = {};
-        filtered.forEach(t => {
-            if (!byDate[t.date]) byDate[t.date] = [];
-            byDate[t.date].push(t);
-        });
-
-        // Iterate dates in range? 
-        // If range is 7d, we should iterate last 7 days.
-        // This is complex for a simple static demo. 
-        // Fallback: Just calculate statics on found tasks + assume untracked for found days? 
-        // Let's iterate the keys we have as a robust enough approx.
-        Object.keys(byDate).forEach(date => {
-            const stats = getFinancials(byDate[date], date); // Pass date to trigger full day calc
-            invested += stats.invested;
-            wasted += stats.wasted;
-        });
-
-        // Today specifics
-        const todayStr = now.toISOString().split('T')[0];
-        const todayTasks = userTasks.filter(t => t.date === todayStr);
-        const todayStats = getFinancials(todayTasks, todayStr);
-
-        return {
-            total_invested: invested,
-            total_wasted: wasted,
-            avg_daily_investment: filtered.length ? Math.round(invested / (filtered.length || 1)) : 0, // crude avg per task? No per day.
-            // efficient avg per day:
-            // unique days
-            // let days = new Set(filtered.map(t => t.date)).size;
-            // avg = invested / days
-
-            total_tasks: filtered.length,
-            today_invested: todayStats.invested,
-            today_wasted: todayStats.wasted,
-            today_tasks: todayTasks.length
-        };
-    },
-
-    // Helper to expose raw data for charts
-    getData: (range) => {
-        return Storage.getTasks(); // Return all tasks
+    if (custom) {
+        if (val === 'Custom') custom.classList.remove('hidden');
+        else custom.classList.add('hidden');
     }
+};
+window.toggleDay = function (el) {
+    el.classList.toggle('active');
 };

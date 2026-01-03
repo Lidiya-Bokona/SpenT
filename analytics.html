@@ -2,365 +2,354 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpenT - Analytics</title>
-    <link rel="icon" type="image/png" href="static/img/logo.jpg">
-    <link rel="stylesheet" href="static/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpenT - Analytics</title>
+  <link rel="icon" type="image/png" href="static/img/logo.jpg">
+  <link rel="stylesheet" href="static/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- jsPDF for export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
-    <nav class="navbar glass">
-        <div class="logo">
-            <a href="index.html"
-                style="text-decoration: none; color: inherit; display:flex; align-items:center; gap:0.5rem;">
-                <div class="hero-logo-animated nav-logo" style="margin:0; width:40px; height:40px;">
-                    <div class="analog-clock" style="width:40px; height:40px; border-width:1px;">
-                        <div class="dollar-sign" style="font-size:1rem;">$</div>
-                        <div class="hand hour-hand" style="height:10px;"></div>
-                        <div class="hand minute-hand" style="height:15px;"></div>
-                    </div>
-                </div>
-                SpenT
-            </a>
+  <nav class="navbar">
+    <div class="logo">
+      <div class="hero-logo-animated nav-logo">
+        <div class="analog-clock">
+          <div class="dollar-sign">$</div>
+          <div class="hand hour-hand"></div>
+          <div class="hand minute-hand"></div>
         </div>
-        <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="calendar.html">Calendar</a>
-            <a href="analytics.html" class="active">Analytics</a>
-        </div>
-    </nav>
-
-    <div class="container">
-        <div class="analytics-wrapper">
-            <div class="dashboard-header"
-                style="justify-content: space-between; align-items: flex-end; display:flex; margin-bottom: 2rem;">
-                <div>
-                    <h1 style="margin-bottom:0.5rem; color: var(--accent-gold);">Financial Analysis</h1>
-                    <p style="color: var(--text-secondary);">Your asset allocation & performance report.</p>
-                </div>
-                <div style="text-align: right;">
-                    <div class="filters"
-                        style="display:inline-flex; gap:0.5rem; margin-bottom:1rem; background:rgba(255,255,255,0.05); padding:0.3rem; border-radius:8px;">
-                        <button onclick="setRange('1d')" class="btn-filter" id="btn-1d">Today</button>
-                        <button onclick="setRange('7d')" class="btn-filter active" id="btn-7d">7 Days</button>
-                        <button onclick="setRange('30d')" class="btn-filter" id="btn-30d">Month</button>
-                        <button onclick="setRange('365d')" class="btn-filter" id="btn-365d">Year</button>
-                    </div>
-                    <div>
-                        <button onclick="exportReport()" class="btn btn-secondary">
-                            <i class="fas fa-file-pdf" style="margin-right:0.5rem;"></i> Export Report
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <style>
-                .btn-filter {
-                    background: transparent;
-                    border: none;
-                    color: var(--text-secondary);
-                    padding: 0.4rem 0.8rem;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-weight: 600;
-                    font-size: 0.85rem;
-                    transition: all 0.2s;
-                }
-
-                .btn-filter:hover {
-                    color: var(--text-primary);
-                }
-
-                .btn-filter.active {
-                    background: var(--accent-gold);
-                    color: #000;
-                    box-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
-                }
-
-                .charts-row-2 {
-                    display: grid;
-                    grid-template-columns: 2fr 1fr;
-                    gap: 1.5rem;
-                    margin-bottom: 1.5rem;
-                }
-
-                @media (max-width: 900px) {
-                    .charts-row-2 {
-                        grid-template-columns: 1fr;
-                    }
-                }
-            </style>
-
-            <!-- Summary Cards -->
-            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
-                <div class="glass-card stat-card">
-                    <div class="stat-label">Total Invested</div>
-                    <div class="stat-value" id="total-invested" style="font-size: 1.5rem; color: var(--accent-green);">
-                        Loading...
-                    </div>
-                    <div class="subtext" style="font-size: 0.8rem;">Lifetime Value</div>
-                </div>
-                <div class="glass-card stat-card">
-                    <div class="stat-label">Total Wasted</div>
-                    <div class="stat-value currency-red" id="total-wasted" style="font-size: 1.5rem;">Loading...</div>
-                    <div class="subtext" style="font-size: 0.8rem;">Lifetime Loss</div>
-                </div>
-                <div class="glass-card stat-card">
-                    <div class="stat-label">Avg Daily Value</div>
-                    <div class="stat-value" id="avg-daily" style="font-size: 1.5rem; color: var(--accent-gold);">
-                        Loading...</div>
-                    <div class="subtext" style="font-size: 0.8rem;">Consistency Score</div>
-                </div>
-                <div class="glass-card stat-card">
-                    <div class="stat-label">Total Tasks</div>
-                    <div class="stat-value" id="total-tasks" style="font-size: 1.5rem; color: #4dabf7;">Loading...</div>
-                    <div class="subtext" style="font-size: 0.8rem;">Activity Volume</div>
-                </div>
-            </div>
-
-            <!-- Today's Snapshot -->
-            <h3 style="color: var(--accent-gold); margin-bottom: 1rem; font-size: 1.1rem; text-transform: uppercase;">
-                Today's
-                Snapshot</h3>
-            <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
-                <div class="glass-card stat-card" style="border-left: 3px solid var(--accent-green);">
-                    <div class="stat-label">Invested Today</div>
-                    <div class="stat-value" id="today-invested" style="font-size: 1.5rem; color: var(--accent-green);">
-                        Loading...
-                    </div>
-                    <div class="subtext" style="font-size: 0.8rem;">Growth Focus</div>
-                </div>
-                <div class="glass-card stat-card" style="border-left: 3px solid #ff4d4d;">
-                    <div class="stat-label">Wasted Today</div>
-                    <div class="stat-value currency-red" id="today-wasted" style="font-size: 1.5rem;">Loading...</div>
-                    <div class="subtext" style="font-size: 0.8rem;">Missed Opportunity</div>
-                </div>
-                <div class="glass-card stat-card" style="border-left: 3px solid #4dabf7;">
-                    <div class="stat-label">Tasks Today</div>
-                    <div class="stat-value" id="today-tasks" style="font-size: 1.5rem; color: #4dabf7;">Loading...</div>
-                    <div class="subtext" style="font-size: 0.8rem;">Daily Activity</div>
-                </div>
-            </div>
-
-            <!-- Charts Grid -->
-
-            <!-- Row 1: Daily Trends (Line) -->
-            <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem; height: 350px;">
-                <h3 style="color: var(--accent-gold); margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase;">
-                    Daily Trends
-                </h3>
-                <div style="height: 280px;">
-                    <canvas id="trendChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Row 2: Time Distribution & Categories -->
-            <div class="charts-row-2">
-                <!-- Time Distribution (Bar) -->
-                <div class="glass-card" style="padding: 1.5rem; height: 350px;">
-                    <h3
-                        style="color: var(--accent-gold); margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase;">
-                        Time
-                        Distribution (24h)</h3>
-                    <div style="height: 280px;">
-                        <canvas id="timeDistChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Category Breakdown (Doughnut) -->
-                <div class="glass-card" style="padding: 1.5rem; height: 350px;">
-                    <h3
-                        style="color: var(--accent-gold); margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase;">
-                        Category
-                        Mix</h3>
-                    <div style="height: 280px; display:flex; justify-content:center;">
-                        <canvas id="categoryChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Row 3: Top Tasks -->
-            <div class="glass-card" style="padding: 1.5rem;">
-                <h3 style="color: var(--accent-gold); margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase;">
-                    Top
-                    Time-Consuming Tasks</h3>
-
-                <div class="leaderboard-container">
-                    <table class="leaderboard-table" style="width:100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid var(--glass-border); text-align:left;">
-                                <th style="padding:0.8rem; color:var(--text-secondary);">Task Name</th>
-                                <th style="padding:0.8rem; color:var(--text-secondary);">Category</th>
-                                <th style="padding:0.8rem; text-align:right; color:var(--text-secondary);">Total Value
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-body">
-                            <!-- JS Loaded -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
+      </div>
+      SpenT
     </div>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="analytics.html" class="active">Analytics</a>
+    </div>
+  </nav>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <script src="static/js/main.js"></script>
+  <div class="container">
+    <div class="analytics-wrapper">
+      <div class="dashboard-header"
+        style="justify-content: space-between; align-items: flex-end; display:flex; margin-bottom: 2rem;">
+        <div>
+          <h1 style="margin-bottom:0.5rem; color: var(--accent-gold);">Financial Analysis</h1>
+          <p style="color: var(--text-secondary);">Your asset allocation & performance report.</p>
+        </div>
+        <div style="text-align: right;">
+          <div class="filters"
+            style="display:inline-flex; gap:0.5rem; margin-bottom:1rem; background:rgba(255,255,255,0.05); padding:0.3rem; border-radius:8px;">
+            <button onclick="setRange('1d')" class="btn-filter" id="btn-1d">Today</button>
+            <button onclick="setRange('7d')" class="btn-filter active" id="btn-7d">7 Days</button>
+            <button onclick="setRange('30d')" class="btn-filter" id="btn-30d">Month</button>
+            <button onclick="setRange('365d')" class="btn-filter" id="btn-365d">Year</button>
+          </div>
+          <div>
+            <button onclick="exportReport()" class="btn btn-secondary">
+              <i class="fas fa-file-pdf" style="margin-right:0.5rem;"></i> Export Report
+            </button>
+          </div>
+        </div>
+      </div>
 
-    <script>
-        let currentRange = '7d';
-        let charts = {}; // Store chart instances
-
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAuth().then(auth => {
-                if (!auth) window.location.href = 'login.html';
-                else loadAll();
-            });
-        });
-
-        function setRange(range) {
-            currentRange = range;
-            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
-            document.getElementById(`btn-${range}`).classList.add('active');
-            loadAll();
+      <style>
+        .btn-filter {
+          background: transparent;
+          border: none;
+          color: var(--text-secondary);
+          padding: 0.4rem 0.8rem;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 0.85rem;
+          transition: all 0.2s;
         }
 
-        function loadAll() {
-            const data = AnalyticsAPI.getSummary(currentRange);
-            if (!data) return;
-
-            // Summary
-            document.getElementById('total-invested').textContent = '$' + (data.total_invested || 0).toLocaleString();
-            document.getElementById('total-wasted').textContent = '$' + (data.total_wasted || 0).toLocaleString();
-            document.getElementById('avg-daily').textContent = '$' + (data.avg_daily_investment || 0).toLocaleString();
-            document.getElementById('total-tasks').textContent = (data.total_tasks || 0).toLocaleString();
-
-            document.getElementById('today-invested').textContent = '$' + (data.today_invested || 0).toLocaleString();
-            document.getElementById('today-wasted').textContent = '$' + (data.today_wasted || 0).toLocaleString();
-            document.getElementById('today-tasks').textContent = (data.today_tasks || 0).toLocaleString();
-
-            loadCharts(currentRange);
-            loadLeaderboard(currentRange);
+        .btn-filter:hover {
+          color: var(--text-primary);
         }
 
-        function loadCharts(range) {
-            // Destroy existing
-            if (charts.trend) charts.trend.destroy();
-            if (charts.time) charts.time.destroy();
-            if (charts.cat) charts.cat.destroy();
-
-            const tasks = AnalyticsAPI.getData(range); // Raw tasks
-
-            // --- 1. Daily Trend ---
-            // Group by day. For 7d/30d/365d we need to show trend over time.
-            // For 1d, maybe hourly? Let's stick to daily for now or skipped for 1d.
-            const ctxTrend = document.getElementById('trendChart').getContext('2d');
-            const trendData = processTrend(tasks, range);
-
-            charts.trend = new Chart(ctxTrend, {
-                type: 'line',
-                data: {
-                    labels: trendData.labels,
-                    datasets: [
-                        {
-                            label: 'Invested',
-                            data: trendData.invested,
-                            borderColor: '#4caf50',
-                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Wasted',
-                            data: trendData.wasted,
-                            borderColor: '#ff4d4d',
-                            backgroundColor: 'rgba(255, 77, 77, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
-                        x: { grid: { display: false }, ticks: { color: '#888' } }
-                    },
-                    plugins: { legend: { labels: { color: '#ccc' } } }
-                }
-            });
-
-            // --- 2. Time Dist ---
-            // Only if we have hours? For now random mock or simple processing
-            const ctxTime = document.getElementById('timeDistChart').getContext('2d');
-            charts.time = new Chart(ctxTime, {
-                type: 'bar',
-                data: {
-                    labels: ['00', '04', '08', '12', '16', '20'], // Simplified buckets
-                    datasets: [{
-                        label: 'Seconds Spent',
-                        data: [0, 0, 0, 0, 0, 0], // Placeholders as complex bucket logic in JS is needed
-                        backgroundColor: 'rgba(212, 175, 55, 0.6)',
-                        borderColor: '#D4AF37',
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
-                }
-            });
-
-            // --- 3. Category ---
-            let cats = { Good: 0, Neutral: 0, Bad: 0 };
-            tasks.forEach(t => cats[t.label] = (cats[t.label] || 0) + 1);
-
-            const ctxCat = document.getElementById('categoryChart').getContext('2d');
-            charts.cat = new Chart(ctxCat, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Good', 'Neutral', 'Bad'],
-                    datasets: [{
-                        data: [cats.Good, cats.Neutral, cats.Bad],
-                        backgroundColor: ['#4caf50', '#888888', '#ff4d4d'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'right', labels: { color: '#ccc' } } }
-                }
-            });
+        .btn-filter.active {
+          background: var(--accent-gold);
+          color: #000;
+          box-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
         }
 
-        function processTrend(tasks, range) {
-            // Sort tasks by date
-            // create map date -> {invested, wasted}
-            // generate labels
-            return { labels: [], invested: [], wasted: [] }; // simplified for now
+        .charts-row-2 {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: 1.5rem;
+          margin-bottom: 1.5rem;
         }
 
-        function loadLeaderboard() {
-            // ... reuse logic ...
+        @media (max-width: 900px) {
+          .charts-row-2 {
+            grid-template-columns: 1fr;
+          }
         }
+      </style>
 
-        async function exportReport() {
-            // ... same PDF logic ...
-        }
+      <!-- Summary Cards -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
+        <div class="glass-card stat-card">
+          <div class="stat-label">Total Invested</div>
+          <div class="stat-value" id="total-invested" style="font-size: 1.5rem; color: var(--accent-green);">0</div>
+          <div class="subtext" style="font-size: 0.8rem;">Period Value</div>
+        </div>
+        <div class="glass-card stat-card">
+          <div class="stat-label">Total Wasted</div>
+          <div class="stat-value currency-red" id="total-wasted" style="font-size: 1.5rem;">0</div>
+          <div class="subtext" style="font-size: 0.8rem;">Period Loss</div>
+        </div>
+        <div class="glass-card stat-card">
+          <div class="stat-label">Avg Daily Value</div>
+          <div class="stat-value" id="avg-daily" style="font-size: 1.5rem; color: var(--accent-gold);">0</div>
+          <div class="subtext" style="font-size: 0.8rem;">Consistency Score</div>
+        </div>
+        <div class="glass-card stat-card">
+          <div class="stat-label">Tasks Logged</div>
+          <div class="stat-value" id="total-tasks" style="font-size: 1.5rem; color: #4dabf7;">0</div>
+          <div class="subtext" style="font-size: 0.8rem;">Activity Volume</div>
+        </div>
+      </div>
 
-    </script>
+      <!-- Charts Grid -->
+      <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem; height: 350px;">
+        <h3 style="color: var(--accent-gold); margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase;">Trends
+          (Simulated Value)</h3>
+        <div style="height: 280px;">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+
+      <div class="charts-row-2">
+        <div class="glass-card" style="padding: 1.5rem; height: 350px;">
+          <h3 style="color: var(--accent-gold); margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase;">Time
+            Distribution (Start Hours)</h3>
+          <div style="height: 280px;">
+            <canvas id="timeDistChart"></canvas>
+          </div>
+        </div>
+        <div class="glass-card" style="padding: 1.5rem; height: 350px;">
+          <h3 style="color: var(--accent-gold); margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase;">
+            Category Mix</h3>
+          <div style="height: 280px; display:flex; justify-content:center;">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Tasks Table -->
+      <div class="glass-card" style="padding: 1.5rem;">
+        <h3 style="color: var(--accent-gold); margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase;">Top
+          Time-Consuming Tasks</h3>
+        <div class="leaderboard-container">
+          <table class="leaderboard-table" style="width:100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--glass-border); text-align:left;">
+                <th style="padding:0.8rem; color:var(--text-secondary);">Task Name</th>
+                <th style="padding:0.8rem; color:var(--text-secondary);">Category</th>
+                <th style="padding:0.8rem; text-align:right; color:var(--text-secondary);">Duration</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="static/js/main.js"></script>
+  <script>
+    // Local Data Helpers (in case main.js exports aren't perfect)
+    function getStoredTasks() {
+      return JSON.parse(localStorage.getItem('spent_tasks') || '[]');
+    }
+
+    function timeStrSecs(t) {
+      if (!t) return 0;
+      const [h, m] = t.split(':').map(Number);
+      return h * 3600 + m * 60;
+    }
+
+    let currentRange = '7d';
+    let charts = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAnalytics();
+    });
+
+    window.setRange = function (range) {
+      currentRange = range;
+      document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+      document.getElementById(`btn-${range}`).classList.add('active');
+      loadAnalytics();
+    }
+
+    function filterTasksByRange(tasks, range) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      let startDate = new Date(now);
+
+      if (range === '1d') startDate = now;
+      else if (range === '7d') startDate.setDate(now.getDate() - 7);
+      else if (range === '30d') startDate.setDate(now.getDate() - 30);
+      else if (range === '365d') startDate.setDate(now.getDate() - 365);
+
+      return tasks.filter(t => {
+        const tDate = new Date(t.date);
+        // reset time to midnight for comparison
+        const dateOnly = new Date(tDate.getFullYear(), tDate.getMonth(), tDate.getDate());
+        return dateOnly >= startDate;
+      });
+    }
+
+    function loadAnalytics() {
+      const allTasks = getStoredTasks();
+      const tasks = filterTasksByRange(allTasks, currentRange);
+
+      // --- Metrics ---
+      let totalInvested = 0;
+      let totalWasted = 0;
+
+      tasks.forEach(t => {
+        const dur = timeStrSecs(t.end_time) - timeStrSecs(t.start_time);
+        if (t.label === 'Good' || t.label === 'Neutral') totalInvested += dur;
+        else totalWasted += dur;
+      });
+
+      document.getElementById('total-invested').textContent = formatDuration(totalInvested);
+      document.getElementById('total-wasted').textContent = formatDuration(totalWasted); // Just show formatted time, not $ for readability here or maybe both?
+      document.getElementById('total-tasks').textContent = tasks.length;
+
+      // Avg Daily (Approximate based on range days)
+      let days = 1;
+      if (currentRange === '7d') days = 7;
+      if (currentRange === '30d') days = 30;
+      if (currentRange === '365d') days = 365;
+
+      const avgSecs = totalInvested / Math.max(1, days); // A bit naive if user just started, but simple.
+      document.getElementById('avg-daily').textContent = formatDuration(avgSecs);
+
+      // --- Charts ---
+      renderCharts(tasks);
+      renderLeaderboard(tasks);
+    }
+
+    function formatDuration(seconds) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      return `${h}h ${m}m`;
+    }
+
+    function renderCharts(tasks) {
+      // Destroy old
+      if (charts.trend) charts.trend.destroy();
+      if (charts.timeDist) charts.timeDist.destroy();
+      if (charts.category) charts.category.destroy();
+
+      const colors = {
+        gold: '#D4AF37',
+        red: '#ff4d4d',
+        green: '#00cc66',
+        blue: '#4dabf7'
+      };
+
+      // 1. Trend (Group by Date)
+      // Map date -> Invested/Wasted
+      const dailyData = {};
+      tasks.forEach(t => {
+        if (!dailyData[t.date]) dailyData[t.date] = { invested: 0, wasted: 0 };
+        const dur = timeStrSecs(t.end_time) - timeStrSecs(t.start_time);
+        if (t.label === 'Good' || t.label === 'Neutral') dailyData[t.date].invested += dur / 3600;
+        else dailyData[t.date].wasted += dur / 3600;
+      });
+
+      const sortedDates = Object.keys(dailyData).sort();
+      const trendCtx = document.getElementById('trendChart').getContext('2d');
+      charts.trend = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+          labels: sortedDates,
+          datasets: [
+            { label: 'Invested (h)', data: sortedDates.map(d => dailyData[d].invested), borderColor: colors.green, tension: 0.4 },
+            { label: 'Wasted (h)', data: sortedDates.map(d => dailyData[d].wasted), borderColor: colors.red, tension: 0.4 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#aaa' } } }, scales: { y: { ticks: { color: '#aaa' }, grid: { color: '#333' } }, x: { ticks: { color: '#aaa' }, grid: { display: false } } } }
+      });
+
+      // 2. Time Dist (Start Hours)
+      const hours = new Array(24).fill(0);
+      tasks.forEach(t => {
+        const h = parseInt(t.start_time.split(':')[0]);
+        hours[h]++;
+      });
+      const timeCtx = document.getElementById('timeDistChart').getContext('2d');
+      charts.timeDist = new Chart(timeCtx, {
+        type: 'bar',
+        data: {
+          labels: hours.map((_, i) => `${i}:00`),
+          datasets: [{ label: 'Tasks Started', data: hours, backgroundColor: colors.blue }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#aaa' }, grid: { color: '#333' } }, x: { ticks: { color: '#aaa' }, grid: { display: false } } } }
+      });
+
+      // 3. Category Mix
+      let counts = { Good: 0, Neutral: 0, Bad: 0 };
+      tasks.forEach(t => counts[t.label] = (counts[t.label] || 0) + 1);
+      const catCtx = document.getElementById('categoryChart').getContext('2d');
+      charts.category = new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Invested', 'Neutral', 'Wasted'],
+          datasets: [{
+            data: [counts.Good, counts.Neutral, counts.Bad],
+            backgroundColor: [colors.green, '#888', colors.red],
+            borderWidth: 0
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#aaa' } } } }
+      });
+    }
+
+    function renderLeaderboard(tasks) {
+      const body = document.getElementById('leaderboard-body');
+      body.innerHTML = '';
+
+      // Sort by duration desc
+      const sorted = [...tasks].sort((a, b) => {
+        const da = timeStrSecs(a.end_time) - timeStrSecs(a.start_time);
+        const db = timeStrSecs(b.end_time) - timeStrSecs(b.start_time);
+        return db - da;
+      }).slice(0, 5); // Top 5
+
+      sorted.forEach(t => {
+        const dur = timeStrSecs(t.end_time) - timeStrSecs(t.start_time);
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--glass-border)';
+        tr.innerHTML = `
+                <td style="padding:0.8rem; color:#fff;">${t.name}</td>
+                <td style="padding:0.8rem;"><span class="badge ${t.label === 'Good' ? 'badge-good' : t.label === 'Bad' ? 'badge-bad' : 'badge-neutral'}">${t.label}</span></td>
+                <td style="padding:0.8rem; text-align:right; color:var(--text-secondary);">${formatDuration(dur)}</td>
+            `;
+        body.appendChild(tr);
+      });
+    }
+
+    window.exportReport = function () {
+      // Open the template in a new tab with current range
+      const url = `pdf_template.html?range=${currentRange}`;
+      window.open(url, '_blank');
+    }
+  </script>
 </body>
 
 </html>

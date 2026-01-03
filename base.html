@@ -25,18 +25,12 @@
             SpenT
         </div>
         <div class="nav-links">
-            {% if current_user.is_authenticated %}
             <a href="{{ url_for('dashboard.index') }}"
                 class="{% if request.endpoint == 'dashboard.index' %}active{% endif %}">Dashboard</a>
             <a href="{{ url_for('dashboard.calendar_view') }}"
                 class="{% if request.endpoint == 'dashboard.calendar_view' %}active{% endif %}">Calendar</a>
             <a href="{{ url_for('dashboard.analytics_view') }}"
                 class="{% if request.endpoint == 'dashboard.analytics_view' %}active{% endif %}">Analytics</a>
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
-            {% else %}
-            <a href="{{ url_for('auth.login') }}">Login</a>
-            <a href="{{ url_for('auth.signup') }}">Sign Up</a>
-            {% endif %}
         </div>
     </nav>
 

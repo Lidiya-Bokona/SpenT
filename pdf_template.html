@@ -3,64 +3,423 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>SpenT Report</title>
+    <title>SpenT Financial Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        :root {
+            --primary: #1a1a1a;
+            --secondary: #666666;
+            --accent: #D4AF37;
+            --danger: #d63031;
+            --success: #00b894;
+            --bg-light: #f8f9fa;
+            --border: #eaeaea;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #ffffff;
+            color: var(--primary);
+            margin: 0;
+            padding: 20px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--accent);
+            margin-bottom: 40px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-circle {
+            width: 45px;
+            height: 45px;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .brand-text {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--primary);
+        }
+
+        .report-meta {
+            text-align: right;
+        }
+
+        .report-title {
+            font-size: 24px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary);
+            margin: 0 0 5px 0;
+        }
+
+        .meta-detail {
+            font-size: 13px;
+            color: var(--secondary);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* --- Stats Cards --- */
+        .stats-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'Outfit', monospace;
+            /* Monospace numbers look professional */
+        }
+
+        .text-gold {
+            color: var(--accent);
+        }
+
+        .text-red {
+            color: var(--danger);
+        }
+
+        .text-dark {
+            color: var(--primary);
+        }
+
+        /* --- Table --- */
+        .table-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            border-left: 3px solid var(--accent);
+            padding-left: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 15px;
+            background-color: var(--bg-light);
+            color: var(--secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 14px 15px;
+            border-bottom: 1px solid var(--border);
+            color: var(--primary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .col-time {
+            font-weight: 500;
+            color: var(--secondary);
+            font-family: inherit;
+        }
+
+        .col-task strong {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .col-task span {
+            color: var(--secondary);
+            font-size: 12px;
+        }
+
+        .col-val {
+            text-align: right;
+            font-weight: 700;
+            font-family: 'Outfit', monospace;
+        }
+
+        /* --- Badges --- */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-good {
+            background-color: rgba(0, 184, 148, 0.1);
+            color: var(--success);
+        }
+
+        .badge-neutral {
+            background-color: rgba(100, 100, 100, 0.1);
+            color: var(--secondary);
+        }
+
+        .badge-bad {
+            background-color: rgba(214, 48, 49, 0.1);
+            color: var(--danger);
+        }
+
+        /* --- Footer --- */
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--secondary);
+        }
+    </style>
 </head>
 
 <body>
+
     <div class="header">
-        <div class="logo">
-            <div class="analog-clock" style="display: inline-block; vertical-align: middle;">
-                <div class="dollar-sign">$</div>
-                <div class="hand hour-hand"></div>
-                <div class="hand minute-hand"></div>
-            </div>
-            <h1
-                style="display:inline-block; vertical-align:middle; margin-left:15px; font-size: 2.5rem; letter-spacing: -1px;">
-                SpenT</h1>
+        <div class="brand">
+            <div class="logo-circle">$</div>
+            <div class="brand-text">SpenT</div>
         </div>
-        <div class="date">Date: {{ date }}</div>
+        <div class="report-meta">
+            <h1 class="report-title">Asset Allocation Report</h1>
+            <p class="meta-detail" id="meta-date">Date: ...</p>
+            <p class="meta-detail" id="meta-range">Period: ...</p>
+        </div>
     </div>
 
-    <div class="summary-box">
-        <h3>Daily Status (Today)</h3>
-        <table class="metrics-table">
-            <tr>
-                <th>Invested</th>
-                <th>Wasted</th>
-                <th>Remaining</th>
-            </tr>
-            <tr>
-                <td class="good">${{ invested }}</td>
-                <td class="bad">${{ wasted }}</td>
-                <td class="neutral">${{ remaining }}</td>
-            </tr>
+    <!-- Summary Stats -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <span class="stat-label">Total Invested</span>
+            <span class="stat-value text-gold" id="stat-invested">$0</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Total Wasted</span>
+            <span class="stat-value text-red" id="stat-wasted">$0</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Net Efficiency</span>
+            <span class="stat-value text-dark" id="stat-efficiency">0%</span>
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="section-title">Detailed Transactions</div>
+        <table>
+            <thead>
+                <tr>
+                    <th width="15%">Time</th>
+                    <th width="45%">Transaction Detail</th>
+                    <th width="15%">Category</th>
+                    <th width="25%" style="text-align:right;">Asset Value</th>
+                </tr>
+            </thead>
+            <tbody id="tx-body">
+                <!-- Rows injected by JS -->
+            </tbody>
         </table>
     </div>
 
-    <h3>Transaction History</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Time</th>
-                <th>Task</th>
-                <th>Type</th>
-                <th>Value (Duration)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for task in tasks %}
-            <tr class="{{ task.label|lower }}">
-                <td>{{ task.start_time.strftime('%H:%M') }} - {{ task.end_time.strftime('%H:%M') }}</td>
-                <td>
-                    <b>{{ task.name }}</b><br>
-                    <small>{{ task.description }}</small>
-                </td>
-                <td>{{ task.label }}</td>
-                <td>${{ '%d' % ((task.end_time - task.start_time).total_seconds()) }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="footer">
+        <div>Generated by SpenT Application</div>
+        <div>Time is your most valuable currency.</div>
+    </div>
+
+    <!-- Logic -->
+    <script>
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        function formatDuration(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return `${h}h ${m}m`;
+        }
+
+        function formatMoney(amount) {
+            // Simply return amount as is, or formatted. 1 sec = $1
+            // Using toLocaleString for pretty numbers
+            return '$' + Math.floor(amount).toLocaleString();
+        }
+
+        function timeStrSecs(t) {
+            if (!t) return 0;
+            const [h, m] = t.split(':').map(Number);
+            return h * 3600 + m * 60;
+        }
+
+        function initReport() {
+            // 1. Get Params
+            const range = getQueryParam('range') || '7d';
+
+            // 2. Load Data
+            const tasksRaw = localStorage.getItem('spent_tasks');
+            const allTasks = tasksRaw ? JSON.parse(tasksRaw) : [];
+
+            // 3. Filter Date Range
+            const now = new Date();
+            now.setHours(23, 59, 59, 999); // End of today
+
+            let startDate = new Date();
+            startDate.setHours(0, 0, 0, 0);
+
+            if (range === '1d') {
+                // Today already set
+            } else if (range === '7d') {
+                startDate.setDate(now.getDate() - 6); // 7 days inclusive
+            } else if (range === '30d') {
+                startDate.setDate(now.getDate() - 29);
+            } else if (range === '365d') {
+                startDate.setDate(now.getDate() - 364);
+            }
+
+            const filteredTasks = allTasks.filter(t => {
+                // Assuming t.date is YYYY-MM-DD local
+                if (!t.date) return false;
+                const [y, m, d] = t.date.split('-').map(Number);
+                const tDateObj = new Date(y, m - 1, d);
+                return tDateObj >= startDate && tDateObj <= now;
+            });
+
+            // 4. Calculate Stats & Sort
+            filteredTasks.sort((a, b) => {
+                // Sort by Date Desc, then Time Desc
+                if (a.date !== b.date) return b.date.localeCompare(a.date);
+                return b.start_time.localeCompare(a.start_time);
+            });
+
+            let totalInvested = 0;
+            let totalWasted = 0;
+
+            const tbody = document.getElementById('tx-body');
+            tbody.innerHTML = '';
+
+            if (filteredTasks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:#999;">No transactions found for this period.</td></tr>`;
+            }
+
+            filteredTasks.forEach(t => {
+                const startSec = timeStrSecs(t.start_time);
+                const endSec = timeStrSecs(t.end_time);
+                const value = endSec - startSec;
+
+                if (t.label === 'Good' || t.label === 'Neutral') totalInvested += value;
+                else totalWasted += value;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="col-time">
+                        <div style="font-size:12px; color:#999; margin-bottom:2px;">${t.date}</div>
+                        ${t.start_time} - ${t.end_time}
+                    </td>
+                    <td class="col-task">
+                        <strong>${t.name}</strong>
+                        ${t.description ? `<span>${t.description}</span>` : ''}
+                    </td>
+                    <td>
+                        <span class="badge ${t.label === 'Good' ? 'badge-good' : t.label === 'Bad' ? 'badge-bad' : 'badge-neutral'}">
+                            ${t.label}
+                        </span>
+                    </td>
+                    <td class="col-val text-${t.label === 'Bad' ? 'red' : 'gold'}">
+                        ${formatMoney(value)}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 5. Update UI Headings
+            document.getElementById('meta-date').textContent = `Generated: ${new Date().toLocaleDateString()}`;
+
+            let rangeText = 'Custom';
+            if (range === '1d') rangeText = 'Today';
+            if (range === '7d') rangeText = 'Last 7 Days';
+            if (range === '30d') rangeText = 'Last 30 Days';
+            if (range === '365d') rangeText = 'Last 365 Days';
+            document.getElementById('meta-range').textContent = `Period: ${rangeText}`;
+
+            document.getElementById('stat-invested').textContent = formatMoney(totalInvested);
+            document.getElementById('stat-wasted').textContent = formatMoney(totalWasted);
+
+            const total = totalInvested + totalWasted;
+            const efficiency = total > 0 ? Math.round((totalInvested / total) * 100) : 0;
+            document.getElementById('stat-efficiency').textContent = efficiency + '%';
+
+            // 6. Print
+            setTimeout(() => {
+                window.print();
+            }, 800);
+        }
+
+        window.onload = initReport;
+    </script>
 </body>
 
 </html>

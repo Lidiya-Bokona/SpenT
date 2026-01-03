@@ -2,173 +2,191 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - SpenT</title>
-    <link rel="stylesheet" href="static/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpenT - Dashboard</title>
+  <link rel="icon" type="image/png" href="static/img/logo.jpg">
+  <link rel="stylesheet" href="static/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-    <nav class="navbar glass">
-        <div class="logo">
-            <a href="index.html"
-                style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
-                <div class="hero-logo-animated nav-logo" style="margin:0; width:40px; height:40px;">
-                    <div class="analog-clock" style="width:40px; height:40px; border-width:1px;">
-                        <div class="dollar-sign" style="font-size:1rem;">$</div>
-                        <div class="hand hour-hand" style="height:10px;"></div>
-                        <div class="hand minute-hand" style="height:15px;"></div>
-                    </div>
-                </div>
-                SpenT
-            </a>
+  <nav class="navbar">
+    <div class="logo">
+      <div class="hero-logo-animated nav-logo">
+        <div class="analog-clock">
+          <div class="dollar-sign">$</div>
+          <div class="hand hour-hand"></div>
+          <div class="hand minute-hand"></div>
         </div>
-        <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="dashboard.html" class="active">Dashboard</a>
-            <a href="calendar.html">Calendar</a>
-            <a href="analytics.html">Analytics</a>
-        </div>
-    </nav>
+      </div>
+      SpenT
+    </div>
+    <div class="nav-links">
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="analytics.html">Analytics</a>
+    </div>
+  </nav>
 
-    <div class="container">
-        <div class="dashboard-header">
-            <h2 id="welcome-message" style="margin:0; color:var(--accent-gold);">Welcome</h2>
-            <div class="time-display" id="current-time" style="font-size:1.2rem; color:var(--text-secondary);"></div>
+  <div class="container">
+    <div class="dashboard-header">
+      <div class="user-greeting">
+        <h2 style="margin:0;">Welcome back, <span style="color: var(--accent-gold);">Investor</span>.</h2>
+        <div id="current-datetime" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">
+          Loading...</div>
+      </div>
+    </div>
+
+    <div class="balance-card glass-card" style="margin-bottom: 2rem;">
+      <div class="balance-label">Remaining Balance</div>
+      <div class="countdown" id="countdown">
+        $<span id="main-counter-display">86,400</span>
+      </div>
+      <p class="subtext">Time is your most valuable asset.</p>
+    </div>
+
+    <div class="metrics-row">
+      <div class="metric-card glass-card">
+        <div class="metric-info">
+          <h4>Invested Today</h4>
+          <div class="metric-value currency-gold">$<span id="invested-today">0</span></div>
+          <div id="invested-duration" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">0h 0m
+          </div>
+        </div>
+        <div class="trend-icon trend-up">📈</div>
+      </div>
+      <div class="metric-card glass-card">
+        <div class="metric-info">
+          <h4>Wasted Time</h4>
+          <div class="metric-value currency-red">$<span id="wasted-time-small">0</span>
+          </div>
+          <div id="wasted-duration" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">0h 0m
+          </div>
+        </div>
+        <div class="trend-icon trend-down" style="color:var(--accent-red, #ff4d4d);">📉</div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="tasks-section" style="width: 100%;">
+        <div class="section-header"
+          style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--glass-border); padding-bottom:1rem;">
+          <h3>Today's Ledger</h3>
+          <button class="btn btn-primary" onclick="openByModal()">+ Add Transaction</button>
         </div>
 
-        <div class="balance-card glass-card">
-            <h3>Daily Balance</h3>
-            <div class="countdown" id="countdown">
-                $<span id="money-counter">...</span>
-            </div>
-            <p class="subtext">Time Remaining</p>
+        <div class="task-list" id="task-list">
+          <p style="text-align:center; color:var(--text-secondary);">Loading transactions...</p>
         </div>
-
-        <div class="metrics-row">
-            <div class="metric-card glass-card">
-                <div class="metric-info">
-                    <h4>Invested Today</h4>
-                    <div class="metric-value currency-gold">$<span id="invested-today">0</span></div>
-                </div>
-                <div class="trend-icon trend-up">📈</div>
-            </div>
-            <div class="metric-card glass-card">
-                <div class="metric-info">
-                    <h4>Wasted Today</h4>
-                    <div class="metric-value currency-red">$<span id="wasted-today">0</span></div>
-                </div>
-                <div class="trend-icon trend-down">📉</div>
-            </div>
-        </div>
-
-        <div class="dashboard-grid">
-            <div class="tasks-section" style="width: 100%;">
-                <div class="section-header">
-                    <h3>Today's Ledger</h3>
-                    <button class="btn btn-primary" onclick="openByModal()">+ Add Task</button>
-                </div>
-
-                <div class="task-list" id="task-list">
-                    <!-- Tasks loaded via JS -->
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
     <!-- Task Modal -->
     <div class="modal-overlay" id="task-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Add New Task</h3>
-                <button class="close-modal-btn" onclick="closeModal()">&times;</button>
-            </div>
-            <form id="modal-task-form">
-                <input type="hidden" id="task-id">
-
-                <div class="form-group">
-                    <label>Task Name</label>
-                    <input type="text" id="m-task-name" placeholder="E.g. Read Book" required>
-                </div>
-
-                <div class="form-group" style="display: flex; gap: 1rem;">
-                    <div style="flex: 1;">
-                        <label>Start Time</label>
-                        <input type="time" id="m-task-start" required>
-                    </div>
-                    <div style="flex: 1;">
-                        <label>End Time</label>
-                        <input type="time" id="m-task-end" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Category</label>
-                    <select id="m-task-label" required>
-                        <option value="Good">Investment (Good)</option>
-                        <option value="Neutral">Neutral</option>
-                        <option value="Bad">Expense/Waste (Bad)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Description (Optional)</label>
-                    <textarea id="m-task-desc" rows="3" placeholder="Details..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                        <input type="checkbox" id="m-is-routine" style="width: auto;">
-                        This is a Routine Task
-                    </label>
-                </div>
-
-                <div class="form-group hidden" id="routine-options">
-                    <label>Repeat On</label>
-                    <div class="recurrence-options">
-                        <button type="button" class="recurrence-btn active" data-value="Daily">Daily</button>
-                        <button type="button" class="recurrence-btn" data-value="Weekdays">Weekdays</button>
-                        <button type="button" class="recurrence-btn" data-value="Weekends">Weekends</button>
-                        <button type="button" class="recurrence-btn" data-value="Custom">Custom</button>
-                    </div>
-                    <input type="hidden" id="m-recurrence-type" value="Daily">
-
-                    <div class="custom-days-selector hidden" id="custom-days-container">
-                        <button type="button" class="day-btn" data-day="Mon">M</button>
-                        <button type="button" class="day-btn" data-day="Tue">T</button>
-                        <button type="button" class="day-btn" data-day="Wed">W</button>
-                        <button type="button" class="day-btn" data-day="Thu">T</button>
-                        <button type="button" class="day-btn" data-day="Fri">F</button>
-                        <button type="button" class="day-btn" data-day="Sat">S</button>
-                        <button type="button" class="day-btn" data-day="Sun">S</button>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary full-width" style="width: 100%; margin-top: 1rem;">Save
-                    Transaction</button>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-title" style="margin:0; font-size:1.5rem; color: var(--accent-gold);">New Transaction</h3>
+          <button class="close-modal-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
         </div>
-    </div>
+        <form id="modal-task-form" class="modern-form">
+          <input type="hidden" id="task-id">
 
-    <div class="stats-section glass-card">
-        <h3>Overview</h3>
-        <canvas id="dailyChart"></canvas>
-    </div>
-    </div>
-    </div>
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="m-task-name" placeholder="E.g. Deep Work" required>
+          </div>
 
-    <script src="static/js/main.js"></script>
-    <script>
-        // Init dashboard on load
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAuth().then(auth => {
-                if (!auth) window.location.href = 'login.html';
-                else loadDashboardData();
-            });
-        });
-    </script>
+          <div class="form-group" style="display: flex; gap: 1rem;">
+            <div style="flex: 1;">
+              <label>Start Time</label>
+              <input type="time" id="m-task-start" required>
+            </div>
+            <div style="flex: 1;">
+              <label>End Time</label>
+              <input type="time" id="m-task-end" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Type (Category)</label>
+            <div class="category-selector">
+              <input type="radio" name="category" id="cat-good" value="Good" checked>
+              <label for="cat-good" class="cat-option option-good">
+                <i class="fas fa-arrow-trend-up"></i>
+                <span>Investment</span>
+              </label>
+
+              <input type="radio" name="category" id="cat-neutral" value="Neutral">
+              <label for="cat-neutral" class="cat-option option-neutral">
+                <i class="fas fa-minus"></i>
+                <span>Neutral</span>
+              </label>
+
+              <input type="radio" name="category" id="cat-bad" value="Bad">
+              <label for="cat-bad" class="cat-option option-bad">
+                <i class="fas fa-arrow-trend-down"></i>
+                <span>Expense</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="m-task-desc" rows="2" placeholder="Add details..."></textarea>
+          </div>
+
+          <div class="form-section-divider"></div>
+
+          <div class="form-group">
+            <div class="routine-toggle-wrapper">
+              <label class="switch-label">
+                <span style="font-weight:600; font-size:0.95rem;">Routine Item</span>
+                <span style="font-size:0.8rem; color:var(--text-secondary); display:block;">Repeat this
+                  automatically</span>
+              </label>
+              <label class="toggle-switch">
+                <input type="checkbox" id="m-is-routine">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group hidden fade-in" id="routine-options">
+            <label style="margin-bottom:0.5rem; display:block;">Frequency</label>
+            <div class="recurrence-options">
+              <input type="hidden" id="m-recurrence-type" value="Daily">
+              <button type="button" class="recurrence-btn active" onclick="setRecurrence('Daily')"
+                data-value="Daily">Daily</button>
+              <button type="button" class="recurrence-btn" onclick="setRecurrence('Weekdays')"
+                data-value="Weekdays">Weekdays</button>
+              <button type="button" class="recurrence-btn" onclick="setRecurrence('Weekends')"
+                data-value="Weekends">Weekends</button>
+              <button type="button" class="recurrence-btn" onclick="setRecurrence('Custom')"
+                data-value="Custom">Custom</button>
+            </div>
+
+            <div class="custom-days-selector hidden" id="custom-days-container" style="margin-top:1rem;">
+              <div class="day-btn" onclick="toggleDay(this)" data-day="Mon">M</div>
+              <div class="day-btn" onclick="toggleDay(this)" data-day="Tue">T</div>
+              <div class="day-btn" onclick="toggleDay(this)" data-day="Wed">W</div>
+              <div class="day-btn" onclick="toggleDay(this)" data-day="Thu">T</div>
+              <div class="day-btn" onclick="toggleDay(this)" data-day="Fri">F</div>
+              <div class="day-btn" onclick="toggleDay(this)" data-day="Sat">S</div>
+              <div class="day-btn" onclick="toggleDay(this)" data-day="Sun">S</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary full-width" style="width: 100%; margin-top: 1rem;">Save
+            Transaction</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="static/js/main.js"></script>
 </body>
 
 </html>
